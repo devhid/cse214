@@ -1,5 +1,8 @@
 package hw1;
 
+import hw1.exceptions.EmptyFloorException;
+import hw1.exceptions.FullFloorException;
+
 /**
  * The <code>Floor</code> class implements a floor of <code>Student</code> objects.
  *

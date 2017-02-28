@@ -1,4 +1,4 @@
-package hw1;
+package hw1.exceptions;
 
 /**
  * The <code>EmptyFloorException</code> is a custom <code>Exception</code> that indicates when a <code>Floor</code> is empty.

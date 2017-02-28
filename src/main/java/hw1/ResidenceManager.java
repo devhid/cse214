@@ -1,5 +1,8 @@
 package hw1;
 
+import hw1.exceptions.EmptyFloorException;
+import hw1.exceptions.FullFloorException;
+
 import java.util.Scanner;
 
 /**
