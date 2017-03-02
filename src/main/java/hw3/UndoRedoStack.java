@@ -50,4 +50,8 @@ public class UndoRedoStack {
     public int getSize() {
         return this.size;
     }
+
+    public void undo() {
+        //top.data.getInverse().perform();
+    }
 }

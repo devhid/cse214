@@ -10,7 +10,10 @@ public class MoveCommand implements ActionCommand {
 
     private final ActionType actionType;
 
-    public MoveCommand() {
+    public MoveCommand(final int firstPosition, final int secondPosition) {
+        this.firstPosition = firstPosition;
+        this.secondPosition = secondPosition;
+
         this.actionType = ActionType.MOVE;
     }
 
@@ -21,6 +24,6 @@ public class MoveCommand implements ActionCommand {
 
     @Override
     public ActionCommand getInverse() {
-        return null;
+        return null; //new MoveCommand(secondPosition, firstPosition);
     }
 }

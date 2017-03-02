@@ -1,16 +1,18 @@
 package hw3.commands;
 
 import hw3.ActionType;
-
 import java.util.List;
 
 public class RemoveCommand implements ActionCommand {
-    private int position;
     private String photo;
+    private int position;
 
     private final ActionType actionType;
 
-    public RemoveCommand() {
+    public RemoveCommand(final String photo, final int position) {
+        this.photo = photo;
+        this.position = position;
+
         this.actionType = ActionType.REMOVE;
     }
 
@@ -21,6 +23,6 @@ public class RemoveCommand implements ActionCommand {
 
     @Override
     public ActionCommand getInverse() {
-        return new AddCommand();
+        return new AddCommand(photo, position);
     }
 }

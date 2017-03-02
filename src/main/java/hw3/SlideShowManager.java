@@ -21,7 +21,7 @@ public class SlideShowManager {
 
     public void openMenu() {
         switch(scanner.nextLine().isEmpty() ? scanner.nextLine().trim().charAt(0) : '0') {
-            
+
         }
     }
 

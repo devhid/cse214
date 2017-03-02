@@ -10,7 +10,10 @@ public class AddCommand implements ActionCommand {
 
     private final ActionType actionType;
 
-    public AddCommand() {
+    public AddCommand(final String photo, final int position) {
+        this.photo = photo;
+        this.position = position;
+
         this.actionType = ActionType.ADD;
     }
 
@@ -21,6 +24,6 @@ public class AddCommand implements ActionCommand {
 
     @Override
     public ActionCommand getInverse() {
-        return new RemoveCommand();
+        return new RemoveCommand(photo, position);
     }
 }
