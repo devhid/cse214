@@ -6,7 +6,6 @@ import java.util.List;
 
 public class SwapCommand implements ActionCommand {
     private int firstPosition, secondPosition;
-
     private ActionType type;
 
     public SwapCommand(final int firstPosition, final int secondPosition) {

@@ -6,8 +6,6 @@ import java.util.List;
 
 public class MoveCommand implements ActionCommand {
     private int firstPosition, secondPosition;
-    private String photo;
-
     private final ActionType actionType;
 
     public MoveCommand(final int firstPosition, final int secondPosition) {
