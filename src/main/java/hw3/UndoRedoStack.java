@@ -38,12 +38,16 @@ public class UndoRedoStack {
     // top references the tail of the doubly-linked list.
     // bottom references the head of the double-linked list.
 
-    private Node top, bottom;
     private int size;
+    private Node top, bottom;
 
     public UndoRedoStack() {
         this.top = null;
         this.bottom = null;
+    }
+
+    public int getSize() {
+        return this.size;
     }
 
     public Node getTop() {
@@ -54,8 +58,8 @@ public class UndoRedoStack {
         return this.bottom;
     }
 
-    public int getSize() {
-        return this.size;
+    public boolean isEmpty() {
+        return top == null;
     }
 
     public void push(final ActionCommand command) {
@@ -93,9 +97,5 @@ public class UndoRedoStack {
         }
 
         return top.getData();
-    }
-
-    public boolean isEmpty() {
-        return top == null;
     }
 }
