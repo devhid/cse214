@@ -11,17 +11,29 @@ public class MoveCommand implements ActionCommand {
     public MoveCommand(final int firstPosition, final int secondPosition) {
         this.firstPosition = firstPosition;
         this.secondPosition = secondPosition;
-
         this.actionType = ActionType.MOVE;
+    }
+
+    public int getFirstPosition() {
+        return this.firstPosition;
+    }
+
+    public int getSecondPosition() {
+        return this.secondPosition;
     }
 
     @Override
     public void perform(List<String> slideshow) {
-
+        slideshow.add(secondPosition, slideshow.remove(firstPosition));
     }
 
     @Override
     public ActionCommand getInverse() {
-        return null; //new MoveCommand(secondPosition, firstPosition);
+        return new MoveCommand(secondPosition, firstPosition);
+    }
+
+    @Override
+    public String getAction() {
+        return String.format(actionType.toString(), firstPosition, secondPosition);
     }
 }

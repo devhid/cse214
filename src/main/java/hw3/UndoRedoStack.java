@@ -4,7 +4,7 @@ import hw3.commands.ActionCommand;
 
 public class UndoRedoStack {
 
-    private class Node {
+    public class Node {
         private ActionCommand data;
         private Node next, previous;
 
@@ -97,5 +97,10 @@ public class UndoRedoStack {
         }
 
         return top.getData();
+    }
+
+    public void clear() {
+        top = null;
+        size = 0;
     }
 }
