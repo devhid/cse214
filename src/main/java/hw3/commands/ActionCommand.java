@@ -12,4 +12,6 @@ public interface ActionCommand {
 
     String getAction();
 
+    String toString();
+
 }

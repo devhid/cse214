@@ -65,12 +65,13 @@ public class UndoRedoStack {
     public void push(final ActionCommand command) {
         Node node = new Node(command);
 
-        if(top == null) {
-            top = new Node(command);
-            bottom = top;
+        if(isEmpty()) {
+            top = node;
+            bottom = node;
         } else {
-            top.setNext(node);
             node.setPrevious(top);
+            top.setNext(node);
+
             top = node;
         }
 
@@ -79,21 +80,20 @@ public class UndoRedoStack {
 
     public ActionCommand pop() throws EmptyStackException {
         if(isEmpty()) {
-            throw new EmptyStackException("The stack is empty.");
+            throw new EmptyStackException(Lang.EMPTY_STACK);
         }
 
         ActionCommand command = this.peek();
 
         top = top.getPrevious();
-        top.setNext(null);
-
         size--;
+
         return command;
     }
 
     public ActionCommand peek() throws EmptyStackException {
-        if(top == null) {
-            throw new EmptyStackException("The stack is empty.");
+        if(isEmpty()) {
+            throw new EmptyStackException(Lang.EMPTY_STACK);
         }
 
         return top.getData();

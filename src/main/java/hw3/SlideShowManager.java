@@ -39,9 +39,9 @@ public class SlideShowManager {
             selectOption();
         } catch (NumberFormatException ex) {
             System.out.print("\n" + Lang.INVALID_NUMBER);
+            reselect();
         } catch (EmptyStackException | IllegalArgumentException ex) {
             System.out.print("\n" + ex.getMessage());
-        } finally {
             reselect();
         }
     }
@@ -50,7 +50,8 @@ public class SlideShowManager {
         String photoName;
         int position;
 
-        switch(input.nextLine().isEmpty() ? input.nextLine().trim().charAt(0) : '0') {
+        String option = input.nextLine().trim().toUpperCase();
+        switch(option.isEmpty() ? '0' : option.charAt(0)) {
             case 'A':
                 System.out.println(Lang.LABEL_ADD_PHOTO);
 
@@ -62,6 +63,7 @@ public class SlideShowManager {
 
                 this.addPhoto(photoName, position);
 
+                reselect();
                 break;
             case 'R':
                 System.out.println(Lang.LABEL_REMOVE_PHOTO);
@@ -71,6 +73,7 @@ public class SlideShowManager {
 
                 this.removePhoto(position);
 
+                reselect();
                 break;
             case 'S':
                 System.out.println(Lang.LABEL_SWAP_PHOTOS);
@@ -82,6 +85,8 @@ public class SlideShowManager {
                 int secondPosition = Integer.parseInt(input.nextLine());
 
                 this.swapPhotos(firstPosition, secondPosition);
+
+                reselect();
                 break;
             case 'M':
                 System.out.println(Lang.LABEL_MOVE_PHOTOS);
@@ -93,48 +98,61 @@ public class SlideShowManager {
                 int destination = Integer.parseInt(input.nextLine());
 
                 this.movePhotos(source, destination);
+
+                reselect();
                 break;
             case 'P':
-                System.out.print("Slideshow:");
-                System.out.print("\n-------------------------------------------" +
-                        "-------------");
+                //System.out.println(slideshow);
+                System.out.print(Lang.LABEL_SLIDESHOW);
 
                 String images = "";
-
                 for(int i = 0; i < slideshow.size(); i++) {
                     String photo = slideshow.get(i);
 
                     if(photo != null) {
                         images += (i + 1) + ") " + photo + ", ";
+                    } else {
+                        break;
                     }
                 }
 
-                System.out.print(images.substring(0, images.length() - 1));
+                if(images.length() != 0) {
+                    System.out.print("\n" + images.substring(0, images.length() - 2));
+                }
 
                 // Print Undo Stack
-                System.out.print("Lang.LABEL_UNDO_STACK:");
+                System.out.println();
+                System.out.print(Lang.LABEL_UNDO_STACK);
 
                 UndoRedoStack.Node undoNode = undo.getTop();
                 while(undoNode != null) {
                     System.out.print("\n" + undoNode.getData().getAction());
-                    undoNode = undoNode.getNext();
+                    undoNode = undoNode.getPrevious();
                 }
 
                 // Print Redo Stack
-                System.out.print("Lang.LABEL_UNDO_STACK:");
+                System.out.println();
+                System.out.print(Lang.LABEL_REDO_STACK);
 
-                UndoRedoStack.Node redoNode = undo.getTop();
+                UndoRedoStack.Node redoNode = redo.getTop();
                 while(redoNode != null) {
                     System.out.print("\n" + redoNode.getData().getAction());
-                    redoNode = redoNode.getNext();
+                    redoNode = redoNode.getPrevious();
                 }
 
+                System.out.println();
+
+                reselect();
                 break;
             case 'Z':
                 this.undo();
+
+                reselect();
                 break;
             case 'Y':
                 this.redo();
+
+                reselect();
                 break;
             case 'Q':
                 System.out.println(Lang.QUIT);
@@ -146,7 +164,9 @@ public class SlideShowManager {
     }
 
     private void addPhoto(final String photo, final int position) {
-        checkPositions(position);
+        if(position < 1 || position > slideshow.size() + 1) {
+            throw new IllegalArgumentException(Lang.INVALID_POSITION);
+        }
 
         redo.clear();
 
@@ -155,7 +175,6 @@ public class SlideShowManager {
 
         undo.push(command);
         System.out.printf(Lang.SUCCESS_ADD_PHOTO, photo, position);
-        reselect();
     }
 
     private void removePhoto(final int position) {
@@ -163,14 +182,13 @@ public class SlideShowManager {
 
         redo.clear();
 
-        String photo = slideshow.get(position);
+        String photo = slideshow.get(position - 1);
 
         ActionCommand command = new RemoveCommand(photo, position - 1);
         command.perform(slideshow);
 
         undo.push(command);
         System.out.printf(Lang.SUCCESS_REMOVE_PHOTO, photo, position);
-        reselect();
     }
 
     private void swapPhotos(final int swap, final int swapWith) {
@@ -195,7 +213,6 @@ public class SlideShowManager {
 
         undo.push(command);
         System.out.printf(Lang.SUCCESS_MOVE_PHOTOS, source, destination);
-        reselect();
     }
 
     private void undo() throws EmptyStackException {
@@ -203,13 +220,12 @@ public class SlideShowManager {
             throw new EmptyStackException(Lang.CANNOT_UNDO);
         }
 
-        ActionCommand command = undo.getTop().getData();
+        ActionCommand command = undo.peek();
 
         redo.push(command);
         undo.pop().getInverse().perform(slideshow);
 
-        System.out.printf(Lang.SUCCESS_UNDO, command.getAction());
-        reselect();
+        System.out.printf(Lang.SUCCESS_UNDO, command.getInverse().toString());
     }
 
     private void redo() throws EmptyStackException {
@@ -217,13 +233,12 @@ public class SlideShowManager {
             throw new EmptyStackException(Lang.CANNOT_REDO);
         }
 
-        ActionCommand command = undo.getTop().getData();
+        ActionCommand command = redo.peek();
 
-        undo.push(redo.getTop().getData());
-        redo.pop().getInverse().perform(slideshow);
+        undo.push(command);
+        redo.pop().perform(slideshow);
 
-        System.out.printf(Lang.SUCCESS_REDO, command.getAction());
-        reselect();
+        System.out.printf(Lang.SUCCESS_REDO, command.toString());
     }
 
     private void checkPositions(int... positions) {

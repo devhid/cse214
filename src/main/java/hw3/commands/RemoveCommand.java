@@ -1,6 +1,8 @@
 package hw3.commands;
 
 import hw3.ActionType;
+import hw3.Lang;
+
 import java.util.List;
 
 public class RemoveCommand implements ActionCommand {
@@ -35,6 +37,11 @@ public class RemoveCommand implements ActionCommand {
 
     @Override
     public String getAction() {
-        return String.format(actionType.toString(), photo, position);
+        return String.format(actionType.toString(), photo, position + 1);
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Lang.SUCCESS_REMOVE_PHOTO, photo, position + 1);
     }
 }
