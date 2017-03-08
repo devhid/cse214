@@ -6,11 +6,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * The {@code SlideShowManager} class is a driver class that handles I/O for menu operations.
+ *
+ * @author Mankirat Gulati
+ *    email: mankirat.gulati@stonybrook.edu
+ *    Stony Brook ID: 111161128
+ */
+
 public class SlideShowManager {
+    // Handles all input from the user.
     private final Scanner input;
+
+    // List of photo names.
     private final List<String> slideshow;
+
+    // The stacks that will handle undo and redo operations.
     private final UndoRedoStack redo, undo;
 
+    // Instantiates input as a Scanner object, slideshow as an ArrayList, and redo/undo as an UndoRedoStack.
     private SlideShowManager() {
         this.input = new Scanner(System.in);
         this.slideshow = new ArrayList<>();
@@ -32,6 +46,7 @@ public class SlideShowManager {
         reselect();
     }
 
+    // Used to continuously ask for input.
     private void reselect() {
         System.out.print(Lang.INPUT_OPTION);
 
@@ -46,6 +61,7 @@ public class SlideShowManager {
         }
     }
 
+    // Handles the I/O for all menu operations.
     private void selectOption() throws EmptyStackException {
         String photoName;
         int position;
@@ -102,43 +118,18 @@ public class SlideShowManager {
                 reselect();
                 break;
             case 'P':
-                //System.out.println(slideshow);
                 System.out.print(Lang.LABEL_SLIDESHOW);
-
-                String images = "";
-                for(int i = 0; i < slideshow.size(); i++) {
-                    String photo = slideshow.get(i);
-
-                    if(photo != null) {
-                        images += (i + 1) + ") " + photo + ", ";
-                    } else {
-                        break;
-                    }
-                }
-
-                if(images.length() != 0) {
-                    System.out.print("\n" + images.substring(0, images.length() - 2));
-                }
+                this.printSlideshow();
 
                 // Print Undo Stack
                 System.out.println();
                 System.out.print(Lang.LABEL_UNDO_STACK);
-
-                UndoRedoStack.Node undoNode = undo.getTop();
-                while(undoNode != null) {
-                    System.out.print("\n" + undoNode.getData().getAction());
-                    undoNode = undoNode.getPrevious();
-                }
+                this.printStack(undo);
 
                 // Print Redo Stack
                 System.out.println();
                 System.out.print(Lang.LABEL_REDO_STACK);
-
-                UndoRedoStack.Node redoNode = redo.getTop();
-                while(redoNode != null) {
-                    System.out.print("\n" + redoNode.getData().getAction());
-                    redoNode = redoNode.getPrevious();
-                }
+                this.printStack(redo);
 
                 System.out.println();
 
@@ -163,6 +154,7 @@ public class SlideShowManager {
         }
     }
 
+    // Adds a photo to the slideshow at the given position.
     private void addPhoto(final String photo, final int position) {
         if(position < 1 || position > slideshow.size() + 1) {
             throw new IllegalArgumentException(Lang.INVALID_POSITION);
@@ -177,6 +169,7 @@ public class SlideShowManager {
         System.out.printf(Lang.SUCCESS_ADD_PHOTO, photo, position);
     }
 
+    // Removes a photo from the slideshow at the given position.
     private void removePhoto(final int position) {
         checkPositions(position);
 
@@ -191,6 +184,7 @@ public class SlideShowManager {
         System.out.printf(Lang.SUCCESS_REMOVE_PHOTO, photo, position);
     }
 
+    // Swaps the photos at the specified positions.
     private void swapPhotos(final int swap, final int swapWith) {
         checkPositions(swap, swapWith);
 
@@ -203,6 +197,7 @@ public class SlideShowManager {
         System.out.printf(Lang.SUCCESS_SWAP_PHOTOS, swap, swapWith);
     }
 
+    // Moves a photo from the source position to the destination position.
     private void movePhotos(final int source, final int destination) {
         checkPositions(source, destination);
 
@@ -215,6 +210,28 @@ public class SlideShowManager {
         System.out.printf(Lang.SUCCESS_MOVE_PHOTOS, source, destination);
     }
 
+    // Prints the slideshow.
+    private void printSlideshow() {
+        String images = "";
+        for(int i = 0; i < slideshow.size(); i++) {
+            images += (i + 1) + ") " + slideshow.get(i) + ", ";
+        }
+
+        if(images.length() != 0) {
+            System.out.print("\n" + images.substring(0, images.length() - 2));
+        }
+    }
+
+    // Prints the contents of the specified stack.
+    private void printStack(final UndoRedoStack stack) {
+        Node node = stack.getTop();
+        while(node != null) {
+            System.out.print("\n" + node.getData().getAction());
+            node = node.getPrevious();
+        }
+    }
+
+    // Undos the last operation performed.
     private void undo() throws EmptyStackException {
         if(undo.isEmpty()) {
             throw new EmptyStackException(Lang.CANNOT_UNDO);
@@ -228,6 +245,7 @@ public class SlideShowManager {
         System.out.printf(Lang.SUCCESS_UNDO, command.getInverse().toString());
     }
 
+    // Redos the last operation undoed.
     private void redo() throws EmptyStackException {
         if(redo.isEmpty()) {
             throw new EmptyStackException(Lang.CANNOT_REDO);
@@ -241,6 +259,7 @@ public class SlideShowManager {
         System.out.printf(Lang.SUCCESS_REDO, command.toString());
     }
 
+    // Checks if the position is valid.
     private void checkPositions(int... positions) {
         for(int position: positions) {
             if(position < 1 || position > slideshow.size()) {

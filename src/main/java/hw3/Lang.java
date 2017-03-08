@@ -1,5 +1,13 @@
 package hw3;
 
+/**
+ * The {@code Lang} class contains all the messages used throughout the program.
+ *
+ * @author Mankirat Gulati
+ *    email: mankirat.gulati@stonybrook.edu
+ *    Stony Brook ID: 111161128
+ */
+
 public final class Lang {
     /* Menu Messages */
     public static final String DESCRIPTION = "Welcome to Slideshow Manager";
@@ -18,9 +26,9 @@ public final class Lang {
     public static final String LABEL_MOVE_PHOTOS = "\nMove Photos:";
     public static final String LABEL_SLIDESHOW = "\nSlideshow:";
     public static final String LABEL_UNDO_STACK = "\nUndo Stack:\n" +
-            "-----------------------------------";
+            "---------------------------------------";
     public static final String LABEL_REDO_STACK = "\nRedo Stack:\n" +
-            "-----------------------------------";
+            "---------------------------------------";
 
     /* Error Messages */
     public static final String INVALID_OPTION = "Operation failed. Option is invalid.";
@@ -29,6 +37,8 @@ public final class Lang {
     public static final String CANNOT_UNDO = "Operation failed. Nothing left to undo.";
     public static final String CANNOT_REDO = "Operation failed. Nothing left to redo.";
     public static final String EMPTY_STACK = "Operation failed. Stack is empty.";
+    public static final String NULL_COMMAND = "Operation failed. Command is null.";
+
 
     /* Success Messages */
     public static final String SUCCESS_ADD_PHOTO = "\nAdded '%s' to position: '%d'.\n";
