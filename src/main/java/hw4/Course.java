@@ -1,8 +1,10 @@
 package hw4;
 
 public class Course {
-    private final int courseNumber;
+    private final OfficeProperties properties = OfficeHourSimulator.getProperties();
+
     private final double arrivalProbability;
+    private final int courseNumber;
 
     private int courseDifficulty;
 
@@ -13,6 +15,15 @@ public class Course {
 
         this.courseNumber = courseNumber;
         this.arrivalProbability = arrivalProbability;
+    }
+
+    private boolean containsCourseNumber(final int courseNumber) {
+        for(int num: properties.getCourseNumbers()) {
+            if(courseNumber == num) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public int getCourseNumber() {
@@ -31,16 +42,9 @@ public class Course {
         this.courseDifficulty = courseDifficulty;
     }
 
-    private boolean containsCourseNumber(final int courseNumber) {
-        for(int num: getProperties().courseNumbers()) {
-            if(courseNumber == num) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private OfficeProperties getProperties() {
-        return OfficeHourSimulator.getProperties();
+    @Override
+    public String toString() {
+        return "courseNumber: " + courseNumber + ", courseDifficulty: " + courseDifficulty
+                + ", arrivalProbability: " + arrivalProbability;
     }
 }

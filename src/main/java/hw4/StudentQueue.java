@@ -18,6 +18,10 @@ public class StudentQueue {
     }
 
     public void enqueue(final Student student) {
+        if(student == null) {
+            throw new IllegalArgumentException("Student cannot be null.");
+        }
+
         Node node = new Node(student);
 
         if(isEmpty()) {

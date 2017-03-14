@@ -7,13 +7,15 @@ import java.util.Properties;
 import java.util.stream.Stream;
 
 public class OfficeProperties {
-    private final String fileName;
+    private String fileName;
     private final Properties properties;
 
-    public OfficeProperties(final String fileName) {
-        this.fileName = fileName;
+    public OfficeProperties() {
         this.properties = new Properties();
+    }
 
+    public void setup(final String fileName) {
+        this.fileName = fileName;
         load();
     }
 
@@ -29,39 +31,39 @@ public class OfficeProperties {
         }
     }
 
-    public int numCourses() {
+    public int getNumCourses() {
         return Integer.parseInt(properties.getProperty("numCourses"));
     }
 
-    public int minTime() {
+    public int getMinTime() {
         return Integer.parseInt(properties.getProperty("minTime"));
     }
 
-    public int maxTime() {
+    public int getMaxTime() {
         return Integer.parseInt(properties.getProperty("maxTime"));
     }
 
-    public int numCups() {
+    public int getNumCups() {
         return Integer.parseInt(properties.getProperty("numCups"));
     }
 
-    public int simulationTime() {
+    public int getSimulationTime() {
         return Integer.parseInt(properties.getProperty("simulationTime"));
     }
 
-    public int numTAs() {
+    public int getNumTAs() {
         return Integer.parseInt(properties.getProperty("numTAs"));
     }
 
-    public int[] courseNumbers() {
+    public int[] getCourseNumbers() {
         return Stream.of(properties.getProperty("courseNumbers")
                 .split(" "))
                 .mapToInt(Integer::parseInt)
                 .toArray();
     }
 
-    public double[] arrivalProbabilities() {
-        return Stream.of(properties.getProperty("arrivalProbabilites")
+    public double[] getArrivalProbabilities() {
+        return Stream.of(properties.getProperty("arrivalProbabilities")
                 .split(" "))
                 .mapToDouble(Double::parseDouble)
                 .toArray();

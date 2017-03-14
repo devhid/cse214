@@ -6,11 +6,12 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class OfficeHourSimulator {
-    private final Scanner input;
+    private static final OfficeProperties properties = new OfficeProperties();
 
-    private static OfficeProperties properties;
     private Course[] courses;
-    private Map<Integer, Double> courseMap;
+
+    private final Scanner input;
+    private final Map<Integer, Double> courseMap;
 
     public OfficeHourSimulator() {
         this.input = new Scanner(System.in);
@@ -19,14 +20,16 @@ public class OfficeHourSimulator {
 
     private void init() {
         System.out.print("Please enter the file name (ending with .properties): ");
-        properties = new OfficeProperties(input.nextLine());
+        properties.setup(input.nextLine());
 
-        courses = new Course[properties.numCourses()];
         setupCourses();
 
-        simulate(properties.simulationTime(), properties.arrivalProbabilities(), courses,
-                properties.minTime(), properties.maxTime(), properties.numCups(), properties.numTAs());
+        simulate(properties.getSimulationTime(), properties.getArrivalProbabilities(),
+                courses, properties.getMinTime(), properties.getMaxTime(),
+                properties.getNumCups(), properties.getNumTAs());
     }
+
+
 
     public static void main(String[] args) {
         new OfficeHourSimulator().init();
@@ -34,29 +37,33 @@ public class OfficeHourSimulator {
 
     public static void simulate(int officeHourTime, double[] arrivalProbability, Course[] courses,
                                 int minTime, int maxTime, int numCups, int numTAs) {
-
+        for(Course course: courses) {
+            System.out.println(course.toString());
+        }
     }
 
     private void setupCourses() {
         setupCourseMap();
-        sortCourseNumbers();
+
+        int[] courseNumbers = properties.getCourseNumbers();
+        sortCourseNumbers(courseNumbers);
 
         int courseNumber, courseDifficulty = 0;
         for (int i = 0; i < courses.length; i++) {
-            courseNumber = properties.courseNumbers()[i];
+            courseNumber = courseNumbers[i];
 
-            courses[i] = new Course(properties.courseNumbers()[i], courseMap.get(courseNumber));
+            courses[i] = new Course(courseNumbers[i], courseMap.get(courseNumber));
             courses[i].setCourseDifficulty(courseDifficulty++);
         }
     }
 
-    private void sortCourseNumbers() {
-        Arrays.sort(properties.courseNumbers());
+    private void sortCourseNumbers(int[] courseNumbers) {
+        Arrays.sort(courseNumbers);
     }
 
     private void setupCourseMap() {
         for(int i = 0; i < courses.length; i++) {
-            courseMap.put(properties.courseNumbers()[i], properties.arrivalProbabilities()[i]);
+            courseMap.put(properties.getCourseNumbers()[i], properties.getArrivalProbabilities()[i]);
         }
     }
 
