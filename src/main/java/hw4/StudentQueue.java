@@ -1,12 +1,54 @@
 package hw4;
 
-public class StudentQueue {
-    private Node front, rear;
+import java.util.Comparator;
+import java.util.PriorityQueue;
+
+public class StudentQueue<E> extends PriorityQueue<E> {
+    public StudentQueue(int capacity, Comparator<E> comparator) {
+        super(capacity, comparator);
+    }
+
+    public StudentQueue(PriorityQueue<E> queue) {
+        super(queue);
+    }
+
+    @Override
+    public int size() {
+        return super.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return super.isEmpty();
+    }
+
+    @Override
+    public E peek() {
+        return super.peek();
+    }
+
+    public void enqueue(final E e) {
+        add(e);
+    }
+
+    public E dequeue() {
+        return poll();
+    }
+
+    /*private Node front, rear;
     private int size;
 
     public StudentQueue() {
         this.front = null;
         this.rear = null;
+    }
+
+    public Node getFront() {
+        return this.front;
+    }
+
+    public Node getRear() {
+        return this.rear;
     }
 
     public int size() {
@@ -29,12 +71,16 @@ public class StudentQueue {
             rear = node;
         } else {
             Node current = front;
-            while(current.getNext() != null) {
+
+            while(current != null) {
                 if(current.getData().getCourse().getCourseNumber() < student.getCourse().getCourseNumber()) {
                     node.setPrevious(current.getPrevious());
                     node.setNext(current);
 
-                    current.getPrevious().setNext(node);
+                    if(current != front) {
+                        current.getPrevious().setNext(node);
+                    }
+
                     current.setPrevious(node);
                     break;
                 }
@@ -46,9 +92,9 @@ public class StudentQueue {
         size++;
     }
 
-    public Student dequeue() throws EmptyQueueException {
+    public Student dequeue() {
         if(isEmpty()) {
-            throw new EmptyQueueException("The queue is empty.");
+            return null;
         }
 
         Student student = this.peek();
@@ -64,11 +110,11 @@ public class StudentQueue {
         return student;
     }
 
-    public Student peek() throws EmptyQueueException {
+    public Student peek() {
         if(isEmpty()) {
-            throw new EmptyQueueException("The queue is empty.");
+            return null;
         }
 
         return front.getData();
-    }
+    }*/
 }
