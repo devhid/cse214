@@ -7,19 +7,13 @@ import java.util.Properties;
 import java.util.stream.Stream;
 
 public class OfficeProperties {
-    private String fileName;
     private final Properties properties;
 
     public OfficeProperties() {
         this.properties = new Properties();
     }
 
-    public void setup(final String fileName) {
-        this.fileName = fileName;
-        load();
-    }
-
-    private void load() {
+    public void load(final String fileName) {
         try(InputStream stream = getClass().getClassLoader().getResourceAsStream(fileName)) {
             if(stream != null) {
                 properties.load(stream);

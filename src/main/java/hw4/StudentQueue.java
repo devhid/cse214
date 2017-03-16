@@ -12,6 +12,19 @@ public class StudentQueue<E> extends PriorityQueue<E> {
         super(queue);
     }
 
+    public void enqueue(final E e) {
+        add(e);
+    }
+
+    public E dequeue() {
+        return poll();
+    }
+
+    @Override
+    public E peek() {
+        return super.peek();
+    }
+
     @Override
     public int size() {
         return super.size();
@@ -20,18 +33,5 @@ public class StudentQueue<E> extends PriorityQueue<E> {
     @Override
     public boolean isEmpty() {
         return super.isEmpty();
-    }
-
-    @Override
-    public E peek() {
-        return super.peek();
-    }
-
-    public void enqueue(final E e) {
-        add(e);
-    }
-
-    public E dequeue() {
-        return poll();
     }
 }

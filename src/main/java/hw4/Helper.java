@@ -1,9 +1,9 @@
 package hw4;
 
 public class Helper {
-    private int timeUntilFree;
     private final boolean isProfessor;
 
+    private int timeUntilFree;
     private Student currentStudent;
 
     public Helper(final boolean isProfessor) {

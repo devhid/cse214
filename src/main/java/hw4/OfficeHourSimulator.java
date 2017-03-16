@@ -4,12 +4,11 @@ import java.util.*;
 
 public class OfficeHourSimulator {
     private static final OfficeProperties properties = new OfficeProperties();
+    private static final Helper professor = new Helper(true);
 
     private static int totalTime = 0;
-    private static Helper professor = new Helper(true);
-
-    private static Helper[] teachingAssistants;
-    private static BooleanSource[] booleanSources;
+    private static Helper[] helpers;
+    private static BooleanSource[] sources;
     private static StudentQueue<Student> students;
 
     private Course[] courses;
@@ -17,7 +16,7 @@ public class OfficeHourSimulator {
     private final Scanner input;
     private final Map<Integer, Double> courseMap;
 
-    public OfficeHourSimulator() {
+    private OfficeHourSimulator() {
         this.input = new Scanner(System.in);
         this.courseMap = new HashMap<>();
     }
@@ -27,15 +26,19 @@ public class OfficeHourSimulator {
         System.out.print("Please enter the file name (ending with .properties): ");
 
         String fileName = input.nextLine();
-        properties.setup(fileName);
-
+        properties.load(fileName);
         System.out.println("File " + fileName + " loaded.\n");
 
+        this.setup();
+    }
+
+    private void setup() {
         setupCourses();
         setupTAs();
         setupSources();
         setupQueue();
 
+        // Start the simulation.
         simulate(properties.getSimulationTime(), properties.getArrivalProbabilities(),
                 courses, properties.getMinTime(), properties.getMaxTime(),
                 properties.getNumCups(), properties.getNumTAs());
@@ -48,11 +51,13 @@ public class OfficeHourSimulator {
     public static void simulate(int officeHourTime, double[] arrivalProbability, Course[] courses,
                                 int minTime, int maxTime, int numCups, int numTAs) {
 
-        System.out.printf("%-8s %s\n", "Course", "Probability");
-        System.out.println("----------------------------");
+        System.out.printf("%-8s |%s\n", "Course", "Probability");
+        System.out.println("----------------------");
         for(Course course: courses) {
-            System.out.printf("%-8s %s\n", course.getCourseNumber(), course.getArrivalProbability());
+            System.out.printf("%-8s |%s\n", course.getCourseNumber(), course.getArrivalProbability());
         }
+
+        System.out.println();
         System.out.println("Number of TAs: " + numTAs);
         System.out.println("Coffee Cups: " + numCups);
         System.out.println("Base Time Interval: " + minTime + "-" + maxTime + " minutes");
@@ -62,10 +67,10 @@ public class OfficeHourSimulator {
 
         while(totalTime != officeHourTime) {
             System.out.println("Time Step " + ++totalTime);
-            System.out.println("--------------------------------");
+            System.out.println("----------------------------------------------------");
 
             for(int i = 0; i < courses.length; i++) {
-                if(booleanSources[i].occurs()) {
+                if(sources[i].occurs()) {
                     Student student = new Student(totalTime, courses[i]);
                     student.setTimeRequired((int) (Math.random() * (maxTime - minTime + 1) + minTime));
 
@@ -99,7 +104,7 @@ public class OfficeHourSimulator {
 
             if(numTAs != 0) {
                 for (int i = 0; i < numTAs; i++) {
-                    Helper helper = teachingAssistants[i];
+                    Helper helper = helpers[i];
 
                     if (helper.getTimeUntilFree() == 0) {
                         Student student = students.dequeue();
@@ -127,11 +132,7 @@ public class OfficeHourSimulator {
             System.out.println();
             System.out.println("Student Queue:");
             System.out.printf("%-4s |%-10s |%-16s |%s\n", "ID", "Course", "Required Time", "Arrival Time");
-            System.out.println("------------------------------------------------");
-
-            /*students.forEach(student -> System.out.printf("%-4d |%-10d |%-16d |%d\n",
-                    student.getStudentId(), student.getCourse().getCourseNumber(),
-                    student.getTimeRequired(), student.getTimeArrived()));*/
+            System.out.println("----------------------------------------------------");
 
             StudentQueue<Student> copy = new StudentQueue<>(students);
             while(!copy.isEmpty()) {
@@ -144,7 +145,7 @@ public class OfficeHourSimulator {
             int timeUntilFree = professor.getTimeUntilFree();
             professor.setTimeUntilFree(timeUntilFree == 0 ? 0 : professor.getTimeUntilFree() - 1);
 
-            for(Helper helper: teachingAssistants) {
+            for(Helper helper: helpers) {
                 timeUntilFree = helper.getTimeUntilFree();
                 helper.setTimeUntilFree(timeUntilFree == 0 ? 0 : helper.getTimeUntilFree() - 1);
             }
@@ -153,39 +154,17 @@ public class OfficeHourSimulator {
         }
     }
 
-    private void setupQueue() {
-        Comparator<Student> comparator = (Student s1, Student s2) -> {
-            int first = s1.getCourse().getCourseNumber();
-            int second = s2.getCourse().getCourseNumber();
+    private void setupCourseMap() {
+        this.courses = new Course[properties.getNumCourses()];
 
-            if(first < second) {
-                return 1;
-            }
-
-            if(first > second) {
-                return -1;
-            }
-
-            return s1.getTimeArrived() - s2.getTimeArrived();
-        };
-
-        students = new StudentQueue<>(500, comparator);
-    }
-
-    private void setupSources() {
-        booleanSources = new BooleanSource[courses.length];
-
-        for(int i = 0; i < booleanSources.length; i++) {
-            booleanSources[i] = new BooleanSource(courses[i].getArrivalProbability());
+        for(int i = 0; i < courses.length; i++) {
+            courseMap.put(properties.getCourseNumbers()[i], properties.getArrivalProbabilities()[i]);
         }
     }
 
-    private void setupTAs() {
-        teachingAssistants = new Helper[properties.getNumTAs()];
-
-        for(int i = 0; i < teachingAssistants.length; i++) {
-            teachingAssistants[i] = new Helper(false);
-        }
+    private int[] sort(int[] courseNumbers) {
+        Arrays.sort(courseNumbers);
+        return courseNumbers;
     }
 
     private void setupCourses() {
@@ -202,20 +181,43 @@ public class OfficeHourSimulator {
         }
     }
 
-    private int[] sort(int[] courseNumbers) {
-        Arrays.sort(courseNumbers);
-        return courseNumbers;
-    }
+    private void setupTAs() {
+        helpers = new Helper[properties.getNumTAs()];
 
-    private void setupCourseMap() {
-        this.courses = new Course[properties.getNumCourses()];
-
-        for(int i = 0; i < courses.length; i++) {
-            courseMap.put(properties.getCourseNumbers()[i], properties.getArrivalProbabilities()[i]);
+        for(int i = 0; i < helpers.length; i++) {
+            helpers[i] = new Helper(false);
         }
     }
 
-    public static OfficeProperties getProperties() {
-        return properties;
+    private void setupSources() {
+        sources = new BooleanSource[courses.length];
+
+        for(int i = 0; i < sources.length; i++) {
+            sources[i] = new BooleanSource(courses[i].getArrivalProbability());
+        }
+    }
+
+    private void setupQueue() {
+        Comparator<Student> comparator = (Student s1, Student s2) -> {
+            int first = s1.getCourse().getCourseNumber();
+            int second = s2.getCourse().getCourseNumber();
+
+            if(first < second) { return 1; }
+            if(first > second) { return -1; }
+
+            return s1.getTimeArrived() - s2.getTimeArrived();
+        };
+
+        students = new StudentQueue<>(500, comparator);
+    }
+
+    public static void checkCourseNumber(final int courseNumber) {
+        for(int number: properties.getCourseNumbers()) {
+            if(number == courseNumber) {
+                return;
+            }
+        }
+
+        throw new IllegalArgumentException("Invalid course number.");
     }
 }
