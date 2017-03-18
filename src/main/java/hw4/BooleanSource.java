@@ -5,7 +5,7 @@ public class BooleanSource {
 
     public BooleanSource(final double probability) {
         if(probability <= 0 || probability > 1) {
-            throw new IllegalArgumentException("Invalid initial probability.");
+            throw new IllegalArgumentException(Lang.INVALID_PROBABILITY);
         }
 
         this.probability = probability;

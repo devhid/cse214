@@ -1,5 +1,6 @@
 package hw4;
 
+import java.io.IOException;
 import java.util.*;
 
 public class OfficeHourSimulator {
@@ -7,6 +8,8 @@ public class OfficeHourSimulator {
     private static final Helper professor = new Helper(true);
 
     private static int totalTime = 0;
+    private static boolean done = false;
+
     private static Helper[] helpers;
     private static BooleanSource[] sources;
     private static StudentQueue<Student> students;
@@ -22,17 +25,13 @@ public class OfficeHourSimulator {
     }
 
     private void init() {
-        System.out.println("\t\tWelcome to the Office Hours Simulation");
-        System.out.print("Please enter the file name (ending with .properties): ");
-
-        String fileName = input.nextLine();
-        properties.load(fileName);
-        System.out.println("File " + fileName + " loaded.\n");
-
+        System.out.print(Lang.DESCRIPTION);
+        System.out.print(Lang.INPUT_FILE);
         this.setup();
     }
 
     private void setup() {
+        setupFile();
         setupCourses();
         setupTAs();
         setupSources();
@@ -44,114 +43,213 @@ public class OfficeHourSimulator {
                 properties.getNumCups(), properties.getNumTAs());
     }
 
-    public static void main(String[] args) {
-        new OfficeHourSimulator().init();
+    private static void validateProperties(int numCourses, int simTime, double[] arriveProb, int[] courseNums,
+                                    int min, int max, int cups, int tas) {
+        if(numCourses < 1) { throw new IllegalArgumentException(Lang.INVALID_NUM_COURSES); }
+        if(simTime < 1) { throw new IllegalArgumentException(Lang.INVALID_SIMULATION_TIME); }
+        if(min < 1) { throw new IllegalArgumentException(Lang.INVALID_MIN_TIME); }
+        if(max < 1) { throw new IllegalArgumentException(Lang.INVALID_MAX_TIME); }
+
+        if(cups < 0) { throw new IllegalArgumentException(Lang.INVALID_NUM_CUPS); }
+        if(tas < 0) { throw new IllegalArgumentException(Lang.INVALID_NUM_TAS); }
+        if(min > max) { throw new IllegalArgumentException(Lang.MIN_TIME_LARGER); }
+
+        for(double value: arriveProb) {
+            if(value < 0) { throw new IllegalArgumentException(Lang.INVALID_PROBABILITY); }
+        }
+
+        for(int value: courseNums) {
+            if(value < 0) { throw new IllegalArgumentException(String.format(Lang.INVALID_COURSE_NUMBER, value)); }
+        }
+
+        if(numCourses != arriveProb.length || numCourses != courseNums.length) {
+            throw new IllegalArgumentException(Lang.UNEQUAL_NUM_COURSES);
+        }
     }
+
+    public static void main(String[] args) {
+        OfficeHourSimulator simulator = new OfficeHourSimulator();
+        try {
+            simulator.init();
+        } catch (NumberFormatException ex) {
+            System.out.print("\n" + Lang.INVALID_NUMBER);
+            System.out.print(Lang.ASK_TO_RERUN);
+            System.exit(0);
+        } catch (IllegalArgumentException ex) {
+            System.out.print("\n" + ex.getMessage());
+            System.out.print(Lang.ASK_TO_RERUN);
+            System.exit(0);
+        }
+    }
+
+    private static void displayProperties(Course[] courses, int numTAs, int numCups, int minTime,
+                                          int maxTime, int officeHourTime) {
+
+        System.out.printf(Lang.PROPERTIES_LABEL_FORMAT, "Course", "Probability");
+        System.out.print(Lang.PROPERTIES_DIVIDER);
+
+        for(Course course: courses) {
+            System.out.printf(Lang.PROPERTIES_DATA_FORMAT, course.getCourseNumber(), course.getArrivalProbability());
+        }
+
+        System.out.println();
+        System.out.printf(Lang.PROPERTY_NUM_TAS, numTAs);
+        System.out.printf(Lang.PROPERTY_NUM_CUPS, numCups);
+        System.out.printf(Lang.PROPERTY_BASE_TIME_INTERVAL, minTime, maxTime);
+        System.out.printf(Lang.PROPERTY_TIME, officeHourTime);
+    }
+
+    private static void displayStudents(Course[] courses, int minTime, int maxTime) {
+        for(int i = 0; i < courses.length; i++) {
+            if(sources[i].occurs() && totalTime < properties.getSimulationTime()) {
+                Student student = new Student(totalTime, courses[i]);
+                student.setTimeRequired((int) (Math.random() * (maxTime - minTime + 1) + minTime));
+
+                students.enqueue(student);
+
+                System.out.printf(Lang.STUDENT_ARRIVED, student.getStudentId(), courses[i].getCourseNumber(), student.getTimeRequired());
+            } else {
+                System.out.printf(Lang.NO_STUDENT_ARRIVED, courses[i].getCourseNumber());
+            }
+        }
+    }
+
+    private static void displayProfessor(int numCups) {
+        if(professor.getTimeUntilFree() == 0) {
+
+            Student student = students.dequeue();
+            if(student == null) {
+                System.out.println(Lang.PROFESSOR_WAITING);
+            } else {
+                int timeUntilFree = (student.getTimeRequired() - numCups) < 1 ? 1 : student.getTimeRequired() - numCups;
+
+                professor.setTimeUntilFree(timeUntilFree);
+                professor.setCurrentStudent(student);
+
+                System.out.printf(Lang.PROFESSOR_BUSY, student.getStudentId(), timeUntilFree);
+            }
+        } else {
+            Student current = professor.getCurrentStudent();
+            System.out.printf(Lang.PROFESSOR_BUSY, current.getStudentId(), professor.getTimeUntilFree());
+        }
+    }
+
+    private static void displayTAs(int numTAs) {
+        if (numTAs == 0) { return; }
+
+        for (int i = 0; i < numTAs; i++) {
+            Helper helper = helpers[i];
+
+            if (helper.getTimeUntilFree() == 0) {
+                Student student = students.dequeue();
+
+                if (student == null) {
+                    System.out.printf(Lang.TA_FREE, (i + 1));
+                } else {
+                    int timeUntilFree = student.getTimeRequired() * 2;
+
+                    helper.setTimeUntilFree(timeUntilFree);
+                    helper.setCurrentStudent(student);
+
+                    System.out.printf(Lang.TA_BUSY, (i + 1), student.getStudentId(), timeUntilFree);
+                }
+            } else {
+                Student current = helper.getCurrentStudent();
+                System.out.printf(Lang.TA_BUSY, (i + 1), current.getStudentId(), helper.getTimeUntilFree());
+            }
+        }
+    }
+
+    private static void displayQueue() {
+        System.out.print(Lang.LABEL_STUDENT_QUEUE);
+        System.out.printf(Lang.QUEUE_CATEGORY_FORMAT, "ID", "Course", "Required Time", "Arrival Time");
+        System.out.print(Lang.QUEUE_DIVIDER);
+
+        StudentQueue<Student> copy = new StudentQueue<>(students);
+
+        while(!copy.isEmpty()) {
+            Student student = copy.dequeue();
+
+            System.out.printf(Lang.QUEUE_DATA_FORMAT,
+                    student.getStudentId(), student.getCourse().getCourseNumber(),
+                    student.getTimeRequired(), student.getTimeArrived());
+        }
+    }
+
+    private static void checkIfDone() {
+        if(professor.getTimeUntilFree() == 0 && totalTime >= properties.getSimulationTime()) { done = true; }
+
+        for(Helper helper: helpers) {
+            if(helper.getTimeUntilFree() != 0) {
+                done = false;
+                break;
+            }
+        }
+    }
+
+    private static void processHelpers() {
+        checkIfDone();
+
+        int timeUntilFree = professor.getTimeUntilFree();
+        professor.setTimeUntilFree(timeUntilFree == 0 ? 0 : professor.getTimeUntilFree() - 1);
+
+        for(Helper helper: helpers) {
+            timeUntilFree = helper.getTimeUntilFree();
+            helper.setTimeUntilFree(timeUntilFree == 0 ? 0 : helper.getTimeUntilFree() - 1);
+        }
+    }
+
 
     public static void simulate(int officeHourTime, double[] arrivalProbability, Course[] courses,
                                 int minTime, int maxTime, int numCups, int numTAs) {
 
-        System.out.printf("%-8s |%s\n", "Course", "Probability");
-        System.out.println("----------------------");
-        for(Course course: courses) {
-            System.out.printf("%-8s |%s\n", course.getCourseNumber(), course.getArrivalProbability());
+        // Display the initial properties used for this simulation.
+        displayProperties(courses, numTAs, numCups, minTime, maxTime, officeHourTime);
+
+        System.out.print(Lang.LABEL_BEGIN_SIMULATION);
+
+        while(!done) {
+            // Display time step.
+            System.out.printf(Lang.TIME_STEP, ++totalTime);
+            System.out.print(Lang.TIME_STEP_DIVIDER);
+
+            // Display the students that arrive for each course.
+            displayStudents(courses, minTime, maxTime);
+
+            System.out.println();
+
+            // Display if the helpers are waiting or helping.
+            displayProfessor(numCups);
+            displayTAs(numTAs);
+
+            System.out.println();
+
+            // Display the current student queue.
+            displayQueue();
+
+            System.out.println();
+
+            // Edit the timeUntilFree fields for the helpers.
+            processHelpers();
+        }
+    }
+
+    private void setupFile() {
+        String fileName = input.nextLine();
+        try {
+            properties.getData(fileName);
+            //properties.load(fileName);
+        } catch (IOException ex) {
+            System.out.print("\n" + ex.getMessage());
+            System.out.print(Lang.ASK_TO_RERUN);
+            System.exit(0);
         }
 
-        System.out.println();
-        System.out.println("Number of TAs: " + numTAs);
-        System.out.println("Coffee Cups: " + numCups);
-        System.out.println("Base Time Interval: " + minTime + "-" + maxTime + " minutes");
-        System.out.println("Time: " + officeHourTime + " minutes");
+        System.out.printf(Lang.SUCCESS_FILE, fileName);
 
-        System.out.println("\nBegin Simulation:");
-
-        while(totalTime != officeHourTime) {
-            System.out.println("Time Step " + ++totalTime);
-            System.out.println("----------------------------------------------------");
-
-            for(int i = 0; i < courses.length; i++) {
-                if(sources[i].occurs()) {
-                    Student student = new Student(totalTime, courses[i]);
-                    student.setTimeRequired((int) (Math.random() * (maxTime - minTime + 1) + minTime));
-
-                    students.enqueue(student);
-
-                    System.out.println("Student " + student.getStudentId() + " has arrived for " + courses[i].getCourseNumber() + " requiring " + student.getTimeRequired() + " minutes.");
-                } else {
-                    System.out.println("No students have arrived for " + courses[i].getCourseNumber() + ".");
-                }
-            }
-
-            System.out.println();
-
-            if(professor.getTimeUntilFree() == 0) {
-                Student student = students.dequeue();
-                if(student == null) {
-                    System.out.println("Professor is waiting for the next student to arrive.");
-                } else {
-                    int timeUntilFree = (student.getTimeRequired() - numCups) < 1 ? 1 : student.getTimeRequired() - numCups;
-                    professor.setTimeUntilFree(timeUntilFree);
-                    professor.setCurrentStudent(student);
-
-                    System.out.println("Professor is helping Student " + student.getStudentId() + ", "
-                            + timeUntilFree + " minutes remaining.");
-                }
-            } else {
-                Student current = professor.getCurrentStudent();
-                System.out.println("Professor is helping Student " + current.getStudentId() + ", "
-                        + professor.getTimeUntilFree() + " minutes remaining.");
-            }
-
-            if(numTAs != 0) {
-                for (int i = 0; i < numTAs; i++) {
-                    Helper helper = helpers[i];
-
-                    if (helper.getTimeUntilFree() == 0) {
-                        Student student = students.dequeue();
-
-                        if(student == null) {
-                            System.out.println("TA " + (i + 1) + " is waiting for the next student to arrive.");
-                        } else {
-                            int timeUntilFree = student.getTimeRequired() * 2;
-
-                            helper.setTimeUntilFree(timeUntilFree);
-                            helper.setCurrentStudent(student);
-
-                            System.out.println("TA " + (i + 1) + " is helping Student " + student.getStudentId() + ", "
-                                    + helper.getTimeUntilFree() + " minutes remaining.");
-                        }
-                    } else {
-                        Student current = helper.getCurrentStudent();
-
-                        System.out.println("TA " + (i + 1) + " is helping Student " + current.getStudentId() + ", "
-                                + helper.getTimeUntilFree() + " minutes remaining.");
-                    }
-                }
-            }
-
-            System.out.println();
-            System.out.println("Student Queue:");
-            System.out.printf("%-4s |%-10s |%-16s |%s\n", "ID", "Course", "Required Time", "Arrival Time");
-            System.out.println("----------------------------------------------------");
-
-            StudentQueue<Student> copy = new StudentQueue<>(students);
-            while(!copy.isEmpty()) {
-                Student student = copy.dequeue();
-                System.out.printf("%-4d |%-10d |%-16d |%d\n",
-                        student.getStudentId(), student.getCourse().getCourseNumber(),
-                        student.getTimeRequired(), student.getTimeArrived());
-            }
-
-            int timeUntilFree = professor.getTimeUntilFree();
-            professor.setTimeUntilFree(timeUntilFree == 0 ? 0 : professor.getTimeUntilFree() - 1);
-
-            for(Helper helper: helpers) {
-                timeUntilFree = helper.getTimeUntilFree();
-                helper.setTimeUntilFree(timeUntilFree == 0 ? 0 : helper.getTimeUntilFree() - 1);
-            }
-
-            System.out.println();
-        }
+        validateProperties(properties.getNumCourses(), properties.getSimulationTime(),
+                properties.getArrivalProbabilities(), properties.getCourseNumbers(),
+                properties.getMinTime(), properties.getMaxTime(), properties.getNumCups(), properties.getNumTAs());
     }
 
     private void setupCourseMap() {
@@ -217,7 +315,6 @@ public class OfficeHourSimulator {
                 return;
             }
         }
-
-        throw new IllegalArgumentException("Invalid course number.");
+        throw new IllegalArgumentException(String.format(Lang.INVALID_COURSE_NUMBER, courseNumber));
     }
 }

@@ -9,7 +9,7 @@ public class Student {
 
     public Student(final int timeArrived, final Course course) {
         if(timeArrived <= 0) {
-            throw new IllegalArgumentException("Invalid arrival time.");
+            throw new IllegalArgumentException(String.format(Lang.INVALID_ARRIVAL_TIME, timeArrived));
         }
 
         OfficeHourSimulator.checkCourseNumber(course.getCourseNumber());

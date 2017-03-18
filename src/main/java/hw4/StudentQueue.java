@@ -12,6 +12,10 @@ public class StudentQueue<E> extends PriorityQueue<E> {
         super(queue);
     }
 
+    public StudentQueue() {
+        super();
+    }
+
     public void enqueue(final E e) {
         add(e);
     }
