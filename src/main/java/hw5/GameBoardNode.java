@@ -4,19 +4,19 @@ public class GameBoardNode {
     private static final int SIZE = 9;
 
     private final GameBoardNode[] configuration;
-    private final GameBoard board;
+    private final GameBoard gameBoard;
 
     private boolean hasEnded;
     private Box currentTurn, winner;
 
     private double winProb, loseProb, drawProb;
 
-    public GameBoardNode(final GameBoard board, final Box currentTurn) {
-        if(board == null || currentTurn == Box.EMPTY) {
+    public GameBoardNode(final GameBoard gameBoard, final Box currentTurn) {
+        if(gameBoard == null || currentTurn == Box.EMPTY) {
            throw new IllegalArgumentException();
         }
 
-        this.board = board;
+        this.gameBoard = gameBoard;
         this.currentTurn = currentTurn;
         this.configuration = new GameBoardNode[SIZE];
     }
@@ -29,8 +29,8 @@ public class GameBoardNode {
         return configuration;
     }
 
-    public GameBoard getBoard() {
-        return this.board;
+    public GameBoard getGameBoard() {
+        return this.gameBoard;
     }
 
     public boolean hasEnded() {
@@ -69,14 +69,20 @@ public class GameBoardNode {
         return this.drawProb;
     }
 
-    public void setProbabilities(final double probability) {
-        this.winProb = probability;
-        this.loseProb = probability;
-        this.drawProb = probability;
+    public void setProbabilities() {
+
     }
 
     public String toString() {
-        return null;
+        String result = "";
+        Box[] boxes = gameBoard.getBoard();
+
+        for(int i = 0; i < boxes.length; i++) {
+            result += "|" + (boxes[i] == Box.EMPTY ? "_" : boxes[i].toString());
+            result += (i + 1) % 3 == 0 ? "|\n" : "";
+        }
+
+        return result;
     }
 
 }

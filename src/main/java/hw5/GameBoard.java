@@ -12,7 +12,12 @@ public class GameBoard {
         return this.board;
     }
 
+    public void setBox(final Box box, int position) {
+        board[position] = box;
+    }
+
     public int getSize() {
         return this.size;
     }
+
 }
