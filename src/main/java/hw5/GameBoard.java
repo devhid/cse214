@@ -1,11 +1,11 @@
 package hw5;
 
 public class GameBoard {
-    private static final int SIZE = 9;
+    private static final int BOARD_SIZE = 9;
     private final Box[] board;
 
     public GameBoard() {
-        this.board = new Box[SIZE];
+        this.board = new Box[BOARD_SIZE];
         this.setup();
     }
 
@@ -15,35 +15,36 @@ public class GameBoard {
         }
     }
 
-    public Box[] getGrid() {
-        return this.board;
-    }
+    public Box[] getGrid() { return this.board; }
 
-    public Box getBox(int position) {
-        return board[position];
-    }
+    public Box getBox(int position) { return board[position]; }
 
-    public void setBox(final Box box, int position) {
-        board[position] = box;
+    public void setBox(final Box box, int position) { board[position] = box; }
+
+    public int getCapacity() { return BOARD_SIZE; }
+
+    public boolean isEmpty(int position) {
+        return board[position] == Box.EMPTY;
     }
 
     public int getSize() {
         int count = 0;
 
         for(Box box: board) {
-            if(box == Box.EMPTY) {
+            if(box != Box.EMPTY) {
                 count++;
             }
         }
         return count;
     }
 
-    public boolean isEmpty(int position) {
-        return board[position - 1] == Box.EMPTY;
-    }
+    public int emptyCount() {
+        int count = 0;
+        for(int i = 0; i < board.length; i++) {
+            count = isEmpty(i) ? ++count : count;
+        }
 
-    public int getCapacity() {
-        return SIZE;
+        return count;
     }
 
     public GameBoard clone() {

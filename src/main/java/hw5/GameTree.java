@@ -13,22 +13,7 @@ public class GameTree {
     public GameTree() {
         this.root = new GameBoardNode(new GameBoard(), Box.X);
         this.cursor = root;
-    }
-
-    public GameBoardNode getRoot() {
-        return this.root;
-    }
-
-    public void setRoot(final GameBoardNode root) {
-        this.root = root;
-    }
-
-    public GameBoardNode getCursor() {
-        return this.cursor;
-    }
-
-    public void setCursor(final GameBoardNode cursor) {
-        this.cursor = cursor;
+        buildTree(root, cursor.getCurrentTurn());
     }
 
     public void makeMove(final int position) {
@@ -36,9 +21,7 @@ public class GameTree {
             throw new IllegalArgumentException();
         }
 
-        Box box = cursor.getBoard().getGrid()[position - 1];
-
-        if(box != Box.EMPTY) {
+        if(!cursor.getBoard().isEmpty(position - 1)) {
             throw new IllegalArgumentException("Invalid move. Position occupied or out of range.\n");
         }
 
@@ -63,44 +46,6 @@ public class GameTree {
         return root;
     }
 
-    public static GameBoardNode[] getLeaves(final GameBoardNode node, int i) {
-        if(isLeaf(node)) {
-            leaves[getFirstAvailablePosition()] = node;
-            //System.out.println(leaves[getFirstAvailablePosition() - 1].toString());
-            leafCount++;
-        } else {
-            for(GameBoardNode child: node.getConfigurations()) {
-                if(child != null) {
-                    getLeaves(child, i);
-                }
-            }
-        }
-
-        return leaves;
-    }
-
-    public static int getFirstAvailablePosition() {
-        int i = 0;
-        while(leaves[i] != null) {
-            i++;
-        }
-        return i;
-    }
-
-    /*public static Set<GameBoardNode> getAllLeafNodes(GameBoardNode node) {
-        Set<GameBoardNode> leafNodes = new HashSet<>();
-        if (isLeaf(node)) {
-            leafNodes.add(node);
-        } else {
-            for (GameBoardNode child : node.getConfigurations()) {
-                if(child != null) {
-                    leafNodes.addAll(getAllLeafNodes(child));
-                }
-            }
-        }
-        return leafNodes;
-    }*/
-
     public static Box checkWin(final GameBoardNode node) {
         if(!isLeaf(node)) {
             return null;
@@ -109,18 +54,42 @@ public class GameTree {
         return getThreeInARow(node.getBoard().getGrid());
     }
 
-    private static boolean isLeaf(final GameBoardNode node) {
-        for(GameBoardNode child: node.getConfigurations()) {
-            if(child != null) {
-                return false;
+    public double cursorProbability() {
+        return cursor.getWinProbability();
+        /*int count = 0;
+
+        for(GameBoardNode node: leaves) {
+            if(node == null) { continue; }
+
+            if (getThreeInARow(node.getBoard().getGrid()) == Box.X) {
+                count++;
             }
         }
-        return true;
+
+        double result = (double) count / leafCount;
+
+        clearLeaves();
+        return new BigDecimal(result).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();*/
+    }
+
+    public static GameBoardNode[] getLeaves(final GameBoardNode node) {
+        if(isLeaf(node)) {
+            leaves[leafCount] = node;
+            leafCount++;
+        } else {
+            for(GameBoardNode child: node.getConfigurations()) {
+                if(child != null) {
+                    getLeaves(child);
+                }
+            }
+        }
+
+        return leaves;
     }
 
     public static Box getThreeInARow(final Box[] grid) {
         // Check rows.
-        for(int i = 0; i < 3; i+=3) {
+        for(int i = 0; i < 9; i+=3) {
             if(grid[i] == grid[i + 1] && grid[i] == grid[i + 2] && grid[i] != Box.EMPTY) {
                 return grid[i];
             }
@@ -145,31 +114,62 @@ public class GameTree {
         return Box.EMPTY;
     }
 
-    public int getTotalLeaves() {
-        return TOTAL_LEAVES;
-    }
+    /* HELPER METHODS */
 
-    public void clearLeaves() {
-        leafCount = 0;
-        for(int i  = 0; i < leaves.length; i++) {
-            leaves[i] = null;
+    private static int getFirstAvailablePosition() {
+        for(int i = 0; i < leaves.length; i++) {
+
         }
+        int i = 0;
+        while(leaves[i] != null) {
+            i++;
+        }
+        return i;
     }
 
-    public double cursorProbability() {
-        int count = 0;
-
-        for(GameBoardNode node: leaves) {
-            if(node != null) {
-                if (getThreeInARow(node.getBoard().getGrid()) == Box.X) {
-                    count++;
+    /*public static Set<GameBoardNode> getAllLeafNodes(GameBoardNode node) {
+        Set<GameBoardNode> leafNodes = new HashSet<>();
+        if (isLeaf(node)) {
+            leafNodes.add(node);
+        } else {
+            for (GameBoardNode child : node.getConfigurations()) {
+                if(child != null) {
+                    leafNodes.addAll(getAllLeafNodes(child));
                 }
             }
         }
+        return leafNodes;
+    }*/
 
-        double result = (double) count / leafCount;
-
-        clearLeaves();
-        return new BigDecimal(result).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();//getAllLeafNodes(cursor).size();
+    private static boolean isLeaf(final GameBoardNode node) {
+        for(GameBoardNode child: node.getConfigurations()) {
+            if(child != null) {
+                return false;
+            }
+        }
+        return true;
     }
+
+    public static void clearLeaves() {
+        for(int i  = 0; i < leaves.length; i++) {
+            leaves[i] = null;
+        }
+        leafCount = 0;
+    }
+
+    /*###### GETTERS & SETTERS ######*/
+
+    public static GameBoardNode[] getLeaves() { return leaves; }
+
+    public GameBoardNode getRoot() { return this.root; }
+
+    public GameBoardNode getCursor() { return this.cursor; }
+
+    public static int getLeafCount() { return leafCount; }
+
+    public static int getTotalLeaves() { return TOTAL_LEAVES; }
+
+    public void setRoot(final GameBoardNode root) { this.root = root; }
+
+    public void setCursor(final GameBoardNode cursor) { this.cursor = cursor; }
 }
