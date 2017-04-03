@@ -15,13 +15,21 @@ public class GameBoard {
         }
     }
 
-    public Box[] getGrid() { return this.board; }
+    public Box[] getGrid() {
+        return this.board;
+    }
 
-    public Box getBox(int position) { return board[position]; }
+    public Box getBox(int position) {
+        return board[position];
+    }
 
-    public void setBox(final Box box, int position) { board[position] = box; }
+    public void setBox(final Box box, int position) {
+        board[position] = box;
+    }
 
-    public int getCapacity() { return BOARD_SIZE; }
+    public int getCapacity() {
+        return BOARD_SIZE;
+    }
 
     public boolean isEmpty(int position) {
         return board[position] == Box.EMPTY;
@@ -35,15 +43,6 @@ public class GameBoard {
                 count++;
             }
         }
-        return count;
-    }
-
-    public int emptyCount() {
-        int count = 0;
-        for(int i = 0; i < board.length; i++) {
-            count = isEmpty(i) ? ++count : count;
-        }
-
         return count;
     }
 

@@ -1,7 +1,5 @@
 package hw5;
 
-import java.math.BigDecimal;
-
 public class GameBoardNode {
     private static final int SIZE = 9;
     private final GameBoardNode[] configurations;
@@ -13,8 +11,12 @@ public class GameBoardNode {
     private double winProb, loseProb, drawProb;
 
     public GameBoardNode(final GameBoard board, final Box currentTurn) {
-        if(board == null || currentTurn == Box.EMPTY) {
-           throw new IllegalArgumentException();
+        if(board == null) {
+            throw new IllegalArgumentException(Lang.NULL_BOARD);
+        }
+
+        if(currentTurn == null) {
+            throw new IllegalArgumentException(Lang.EMPTY_CURRENT_TURN);
         }
 
         this.hasEnded = false;
@@ -23,109 +25,136 @@ public class GameBoardNode {
         this.configurations = new GameBoardNode[SIZE];
     }
 
-    private GameBoardNode(final GameBoardNode node) {
-        this(node.board, node.currentTurn);
+    private void probHelper(final GameBoardNode node) {
+        if(node.hasEnded()) {
+            Box result = node.getWinner();
 
-        for(int i = 0; i < node.getBoard().getCapacity(); i++) {
-            board.getGrid()[i] = node.getBoard().getGrid()[i];
-        }
-    }
-
-    public int getWinningNode() {
-        int max = 0;
-
-        for(int i = 0; i < configurations.length; i++) {
-            if(configurations[max] == null) {
-                max = i;
-                continue;
-            }
-            break;
-        }
-
-        for(int i = max; i < configurations.length; i++) {
-            GameBoardNode node = configurations[i];
-            if(node != null) {
-                node.setProbabilities();
-                if(configurations[max].getLoseProbability() == node.getLoseProbability()) {
-                    max = configurations[max].getWinProbability() < node.getWinProbability() ? max : i;
-                } else {
-                    max = configurations[max].getLoseProbability() > node.getLoseProbability() ? max : i;
+            winProb =  (result == currentTurn) ? winProb + 1 : winProb;
+            drawProb = (result == Box.EMPTY) ? drawProb + 1 : drawProb;
+            loseProb = (result != currentTurn && result != Box.EMPTY) ? loseProb + 1 : loseProb;
+        } else {
+            for(GameBoardNode child: node.getConfigurations()) {
+                if(child != null) {
+                    probHelper(child);
                 }
             }
         }
-
-        return max;
     }
 
     public void setProbabilities() {
-        GameBoardNode[] leaves = GameTree.getLeaves(this);
-        double win = 0, lose = 0, draw = 0;
+        probHelper(this);
 
-        for(GameBoardNode node: leaves) {
-            if(node == null) { continue; }
+        double leafCount = winProb + loseProb + drawProb;
 
-            Box result = GameTree.getThreeInARow(node.getBoard().getGrid());
-
-            if (result == currentTurn) {
-                win++;
-            } else if(result == Box.EMPTY) {
-                draw++;
-            } else {
-                lose++;
-            }
-        }
-
-        int leafCount = GameTree.getLeafCount();
-
-        GameTree.clearLeaves();
-        winProb = new BigDecimal(win / leafCount).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-        loseProb = new BigDecimal(lose / leafCount).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-        drawProb = new BigDecimal(draw / leafCount).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+        winProb  = winProb  / leafCount;
+        loseProb = loseProb / leafCount;
+        drawProb = drawProb / leafCount;
     }
 
     public void buildConfigurations() {
-        int numConfigs = board.emptyCount();
-        int count = 0;
-
         GameBoard copy;
-        for(int i = 0; i < configurations.length; i++) {
-            copy = board.clone();
 
-            if (copy.getBox(i) != Box.EMPTY) {
+        for(int i = 0; i < configurations.length; i++) {
+            if(board.getBox(i) != Box.EMPTY) {
                 continue;
             }
+            copy = board.clone();
 
             copy.setBox(currentTurn, i);
-            configurations[i] = (count++ == numConfigs) ?
-                    null : new GameBoardNode(copy, currentTurn);
+            configurations[i] = new GameBoardNode(copy, currentTurn);
         }
     }
 
-    public int getCapacity() { return SIZE; }
+    public boolean hasEnded() {
+        Box[] grid = board.getGrid();
 
-    public GameBoardNode[] getConfigurations() { return configurations; }
+        checkRowWin(grid);
+        checkColumnWin(grid);
+        checkDiagonalWin(grid);
 
-    public GameBoard getBoard() { return this.board; }
+        checkDraw();
+        return winner != null;
+    }
 
-    public Box getCurrentTurn() { return this.currentTurn; }
+    private void checkRowWin(final Box[] grid) {
+        for(int i = 0; i < 9; i+=3) {
+            if(grid[i] == grid[i + 1] && grid[i] == grid[i + 2] && grid[i] != Box.EMPTY) {
+                this.winner = grid[i];
+            }
+        }
+    }
 
-    public Box getWinner() { return this.winner; }
+    private void checkColumnWin(final Box[] grid) {
+        for(int i = 0; i < 3; i++) {
+            if(grid[i] == grid[i + 3] && grid[i] == grid[i + 6] && grid[i] != Box.EMPTY) {
+                winner = grid[i];
+            }
+        }
+    }
 
-    public boolean hasEnded() { return this.hasEnded; }
+    private void checkDiagonalWin(final Box[] grid) {
+        if(grid[2] == grid[4] && grid[2] == grid[6] && grid[2] != Box.EMPTY) {
+            winner = grid[2];
+        }
 
-    public void setBoard(final GameBoard board) { this.board = board; }
+        if(grid[0] == grid[4] && grid[0] == grid[8] && grid[0] != Box.EMPTY) {
+            winner = grid[0];
+        }
+    }
 
-    public void setCurrentTurn(final Box currentTurn) { this.currentTurn = currentTurn; }
+    private void checkDraw() {
+        if(board.getSize() == 9 && winner == null) {
+            winner = Box.EMPTY;
+        }
+    }
 
-    public void setWinner(final Box winner) { this.winner = winner; }
+    public GameBoardNode[] getConfigurations() {
+        return configurations;
+    }
 
-    public void setHasEnded(final boolean hasEnded) { this.hasEnded = hasEnded; }
+    public GameBoardNode getConfig(int position) {
+        return configurations[position];
+    }
 
-    public double getWinProbability() { return this.winProb; }
+    public GameBoard getBoard() {
+        return this.board;
+    }
 
-    public double getLoseProbability() { return this.loseProb; }
+    public Box getCurrentTurn() {
+        return this.currentTurn;
+    }
 
-    public double getDrawProbability() { return this.drawProb; }
+    public Box getWinner() {
+        return this.winner;
+    }
+
+    public int getCapacity() {
+        return SIZE;
+    }
+
+    public void setBoard(final GameBoard board) {
+        this.board = board;
+    }
+
+    public void setCurrentTurn(final Box currentTurn) {
+        this.currentTurn = currentTurn;
+    }
+
+    public void setWinner(final Box winner) {
+        this.winner = winner;
+    }
+
+    public double getWinProbability() {
+        return this.winProb;
+    }
+
+    public double getLoseProbability() {
+        return this.loseProb;
+    }
+
+    public double getDrawProbability() {
+        return this.drawProb;
+    }
 
     public int getSize() {
         int count = 0;
