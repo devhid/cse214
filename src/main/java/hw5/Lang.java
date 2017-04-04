@@ -1,5 +1,13 @@
 package hw5;
 
+/**
+ * The {@code Lang} class contains all the messages used throughout the program.
+ *
+ * @author Mankirat Gulati
+ *    email: mankirat.gulati@stonybrook.edu
+ *    Stony Brook ID: 111161128
+ */
+
 public class Lang {
     public static final String DESCRIPTION = "\t\tWelcome to Tic Tac Toe!\n";
     public static final String LABEL_BOARD = "This is the board:\n";

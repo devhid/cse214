@@ -3,10 +3,21 @@ package hw5;
 import java.math.BigDecimal;
 import java.util.Scanner;
 
+/**
+ * The {@code TicTacToeAI) class acts as the driver for the tic-tac-toe game.
+ *
+ * @author Mankirat Gulati
+ *    email: mankirat.gulati@stonybrook.edu
+ *    Stony Brook ID: 111161128
+ */
 public class TicTacToeAI {
+    // Used to handle input from the player.
     private static final Scanner input = new Scanner(System.in);
+
+    // Starting game phase is player's turn.
     private static GamePhase phase = GamePhase.PLAYER_TURN;
 
+    // Used to determine what phase the game is currently in.
     private enum GamePhase {
         PLAYER_TURN,
         CHECK_WIN,
@@ -18,6 +29,7 @@ public class TicTacToeAI {
         replay(new GameTree());
     }
 
+    // Used to reenter positions in case of exceptions.
     private static void replay(final GameTree tree) {
         try {
             play(tree);
@@ -30,6 +42,11 @@ public class TicTacToeAI {
         }
     }
 
+    /**
+     * Main functionality for the tic-tac-toe game. Handles game flow and logic.
+     *
+     * @param tree The {@code GameTree} object that is used to select wanted moves/configurations.
+     */
     public static void play(final GameTree tree) {
         switch (phase) {
             case PLAYER_TURN:
@@ -69,6 +86,7 @@ public class TicTacToeAI {
 
     }
 
+    // Prints the cursor's board and prints out the calculated probabilities.
     private static void printCursor(final GameTree tree) {
         System.out.println(tree.getCursor());
 
@@ -78,6 +96,7 @@ public class TicTacToeAI {
         System.out.printf(Lang.PROBABILITY, "drawing", round(tree.getCursor().getDrawProbability()));
     }
 
+    // Prints the display message(s) and starting board.
     private static void showRoot() {
         System.out.print(Lang.DESCRIPTION);
         System.out.print(Lang.LABEL_BOARD);
@@ -85,6 +104,7 @@ public class TicTacToeAI {
         System.out.print(getStartingBoard());
     }
 
+    // Attempts to place a box at the specified position, throws error if not possible.
     private static void tryMove(final GameTree tree, final int position) {
         try {
             tree.makeMove(position);
@@ -94,6 +114,7 @@ public class TicTacToeAI {
         }
     }
 
+    // Determines the position for the AI based on losing/winning probabilities.
     private static int getWinningPosition(final GameBoardNode cursor) {
         GameBoardNode[] configurations = cursor.getConfigurations();
         int position = 0;
@@ -118,10 +139,12 @@ public class TicTacToeAI {
         return position + 1;
     }
 
+    // Rounds a value to two decimal places.
     private static double round(double value) {
         return BigDecimal.valueOf(value).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
+    // Gets the starting configuration of the board with numbers labeled 1-9.
     private static String getStartingBoard() {
         String result = "";
 
