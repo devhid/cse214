@@ -23,4 +23,5 @@ public class Lang {
 
     public static final String NULL_BOARD = "Error. Board cannot be null.";
     public static final String EMPTY_CURRENT_TURN = "Error. Current turn cannot be empty.";
+    public static final String CANNOT_UNDO = "Error. You cannot undo anymore.\n";
 }

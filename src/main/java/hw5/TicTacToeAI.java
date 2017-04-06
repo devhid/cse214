@@ -52,7 +52,22 @@ public class TicTacToeAI {
             case PLAYER_TURN:
                 System.out.print(Lang.MAKE_MOVE);
                 int position = Integer.parseInt(input.nextLine());
-                tryMove(tree, position);
+                if(position == 0) {
+                    if(undoMove(tree)) {
+                        if(tree.getCursor().getBoard().getSize() != 0) {
+                            printCursor(tree);
+                        } else {
+                            System.out.print(getStartingBoard());
+                        }
+                    } else {
+                        System.out.println(Lang.CANNOT_UNDO);
+                        System.out.print(getStartingBoard());
+                    }
+
+                    phase = GamePhase.PLAYER_TURN;
+                } else {
+                    tryMove(tree, position);
+                }
 
                 phase = GamePhase.CHECK_WIN;
             case CHECK_WIN:
@@ -188,6 +203,16 @@ public class TicTacToeAI {
         }
 
         return numCorners == 2;
+    }
+
+    private static boolean undoMove(final GameTree tree) {
+        if(tree.getCursor().getParent() != null) {
+            if (tree.getCursor().getParent().getParent() != null) {
+                tree.setCursor(tree.getCursor().getParent().getParent());
+                return true;
+            }
+        }
+        return false;
     }
 
 

@@ -32,7 +32,7 @@ public class GameTree {
      * @param position The location selected on the grid for the move.
      */
     public void makeMove(final int position) throws IllegalArgumentException {
-        if(position < 1 || position > 9) {
+        if(position < 0 || position > 9) {
             throw new IllegalArgumentException(Lang.INVALID_MOVE);
         }
 
@@ -104,5 +104,14 @@ public class GameTree {
      */
     public GameBoardNode getCursor() {
         return this.cursor;
+    }
+
+    /**
+     * Sets the cursor for this tree to the specified cursor.
+     *
+     * @param cursor The {@code GameBoardNode} that is being set as the new cursor.
+     */
+    public void setCursor(final GameBoardNode cursor) {
+        this.cursor = cursor;
     }
 }

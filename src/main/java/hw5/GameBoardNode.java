@@ -15,6 +15,9 @@ public class GameBoardNode {
     // The array holding the child configurations of this node.
     private final GameBoardNode[] configurations;
 
+    // The parent of this node.
+    private GameBoardNode parent;
+
     // The board object linked to this configuration.
     private GameBoard board;
 
@@ -96,6 +99,7 @@ public class GameBoardNode {
 
             copy.setBox(currentTurn, i);
             configurations[i] = new GameBoardNode(copy, currentTurn);
+            configurations[i].setParent(this);
         }
     }
 
@@ -168,6 +172,24 @@ public class GameBoardNode {
      */
     public GameBoardNode getConfig(int position) {
         return configurations[position];
+    }
+
+    /**
+     * Sets the parent of this node to the specified node.
+     *
+     * @param parent The {@code GameBoardNode} object that is being set as the parent node for this nde.
+     */
+    public void setParent(final GameBoardNode parent) {
+        this.parent = parent;
+    }
+
+    /**
+     * Returns the parent node for this node.
+     *
+     * @return The {@code GameBoardNode} object acting as this node's parent in the tree hierarchy.
+     */
+    public GameBoardNode getParent() {
+        return this.parent;
     }
 
     /**
