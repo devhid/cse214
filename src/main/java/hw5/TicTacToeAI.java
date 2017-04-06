@@ -116,6 +116,9 @@ public class TicTacToeAI {
 
     // Determines the position for the AI based on losing/winning probabilities.
     private static int getWinningPosition(final GameBoardNode cursor) {
+        if(isTrap(cursor)) { return 2; }
+        if(isMiddleTrick(cursor) != -1) { return isMiddleTrick(cursor) + 1; }
+
         GameBoardNode[] configurations = cursor.getConfigurations();
         int position = 0;
 
@@ -138,6 +141,64 @@ public class TicTacToeAI {
 
         return position + 1;
     }
+
+    // Checks if the player has a box in the middle and a edge.
+    private static int isMiddleTrick(final GameBoardNode cursor) {
+        if(cursor.getBoard().getSize() != 3) { return -1; }
+
+        Box[] grid = cursor.getBoard().getGrid();
+        if(grid[4] != Box.X) { return -1; }
+
+        boolean isCorner = false;
+        for(int i = 0; i < grid.length; i+=2) {
+            if (grid[i] == Box.O && i != 4) {
+                isCorner = true;
+            }
+        }
+
+        if(!isCorner) { return -1; }
+
+        int position = -1;
+        for(int i = 1; i < grid.length; i+=2) {
+            if(grid[i] == Box.X) {
+                position = i;
+                break;
+            }
+        }
+
+        if(position == -1) { return -1; }
+        switch(position) {
+            case 1: return 7;
+            case 3: return 5;
+            case 5: return 3;
+            case 7: return 1;
+        }
+
+        return -1;
+    }
+
+    // Checks if the AI is being double trapped by the player.
+    private static boolean isTrap(final GameBoardNode cursor) {
+        if(cursor.getBoard().getSize() != 3) {
+            return false;
+        }
+
+        Box[] grid = cursor.getBoard().getGrid();
+        if(grid[4] != Box.O) {
+            return false;
+        }
+
+        int numCorners = 0;
+
+        for(int i = 0; i < grid.length; i+=2) {
+            if (grid[i] == Box.X && i != 4) {
+                numCorners++;
+            }
+        }
+
+        return numCorners == 2;
+    }
+
 
     // Rounds a value to two decimal places.
     private static double round(double value) {
