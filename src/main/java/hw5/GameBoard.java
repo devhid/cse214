@@ -46,7 +46,7 @@ public class GameBoard {
      * @param position The location of where we will get the {@code Box} from the array.
      * @return The {@code Box} object located at {@code position} in {@code board}.
      */
-    public Box getBox(int position) {
+    public Box getBox(final int position) {
         return board[position];
     }
 
@@ -56,7 +56,7 @@ public class GameBoard {
      * @param box The {@code Box} we are setting at the specified {@code position}.
      * @param position The location of where we will set the {@code Box} in the array.
      */
-    public void setBox(final Box box, int position) {
+    public void setBox(final Box box, final int position) {
         board[position] = box;
     }
 
@@ -66,7 +66,7 @@ public class GameBoard {
      * @param position The location in the array that is being checked to see if its box is empty.
      * @return {@code true} if the box at {@code position} is {@code Box.EMPTY}, {@code false} otherwise.
      */
-    public boolean isEmpty(int position) {
+    public boolean isEmpty(final int position) {
         return board[position] == Box.EMPTY;
     }
 

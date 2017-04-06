@@ -51,7 +51,7 @@ public class GameTree {
      * @return The root node for this tree.
      */
     public static GameBoardNode buildTree(final GameBoardNode root, Box turn) {
-        if(!root.hasEnded()) {
+        if(checkWin(root) == null) {
             root.buildConfigurations();
         }
 

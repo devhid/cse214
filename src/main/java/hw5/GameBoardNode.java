@@ -77,7 +77,6 @@ public class GameBoardNode {
         probHelper(this);
 
         double leafCount = winProb + loseProb + drawProb;
-
         winProb  = winProb  / leafCount;
         loseProb = loseProb / leafCount;
         drawProb = drawProb / leafCount;
