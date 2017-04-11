@@ -7,7 +7,7 @@ import java.util.Set;
 public class Account implements Serializable {
     private final Set<User> followers, following;
 
-    private String name;
+    private final String name;
     private final Password password;
 
     public Account(final String name, final Password password) {
