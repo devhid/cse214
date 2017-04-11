@@ -1,6 +1,8 @@
 package hw6;
 
-public class User {
+import java.io.Serializable;
+
+public class User implements Serializable {
     private String name;
 
     public User(final String name) {
