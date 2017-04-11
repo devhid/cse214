@@ -23,4 +23,10 @@ public class Password implements Serializable {
         );
     }
 
+    @Override
+    public boolean equals(Object object) {
+        return !(object instanceof Password)
+                || !password.equals( ((Password) object).password );
+    }
+
 }
