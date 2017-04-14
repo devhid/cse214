@@ -26,6 +26,30 @@ public class Account implements Serializable {
         return password;
     }
 
+    public void addFollowing(final User user) {
+        following.add(user);
+    }
+
+    public void removeFollowing(final User user) {
+        following.remove(user);
+    }
+
+    public void addFollower(final User user) {
+        followers.add(user);
+    }
+
+    public void removeFollower(final User user) {
+        followers.remove(user);
+    }
+
+    public boolean isFollowing(final User user) {
+        return following.contains(user);
+    }
+
+    public boolean hasFollower(final User user) {
+        return followers.contains(user);
+    }
+
     public Set<User> getFollowers() {
         return this.followers;
     }
@@ -39,8 +63,9 @@ public class Account implements Serializable {
         if(!(object instanceof Account)) { return false; }
         Account other = (Account) object;
 
-        return !name.equals(other.name)
-                || password != other.password;
+
+
+        return !name.equals(other.name) || password != other.password;
     }
 
 }
