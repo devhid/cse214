@@ -74,7 +74,7 @@ public class BitterPlatform {
                 System.out.printf("Menu: \n\t%s \n\t%s \n\t%s\n", "L) Login", "S) Sign up", "Q) Quit"); break;
             case USER: System.out.printf("Menu: \n\t%s \n\t%s \n\t%s \n\t%s \n\t%s \n\t%s \n\t%s\n",
                     "F) Follow", "U) Unfollow", "V) View Followers",
-                    "S) See Following", "List All Users", "Logout", "Close Your Account"); break;
+                    "S) See Following", "A) List All Users", "L) Logout", "C) Close Your Account"); break;
         }
     }
 
@@ -93,6 +93,7 @@ public class BitterPlatform {
             selectOption(letter, type);
         } catch (IllegalArgumentException ex) {
             System.out.print("\n" + ex.getMessage());
+            openMenu(type);
         }
     }
 
@@ -106,7 +107,7 @@ public class BitterPlatform {
                         System.out.print("Please enter your email: ");
                         email = input.nextLine();
 
-                        System.out.print("\nPlease enter your password: ");
+                        System.out.print("Please enter your password: ");
                         password = input.nextLine();
 
                         this.login(email, password);
@@ -115,10 +116,10 @@ public class BitterPlatform {
                         System.out.print("Please enter your email: ");
                         email = input.nextLine();
 
-                        System.out.print("\nPlease enter your name: ");
+                        System.out.print("Please enter your name: ");
                         name = input.nextLine();
 
-                        System.out.print("\nPlease enter your password: ");
+                        System.out.print("Please enter your password: ");
                         password = input.nextLine();
 
                         this.signup(email, name, password);
@@ -200,32 +201,40 @@ public class BitterPlatform {
     }
 
     private void follow(final String email) {
-        Account account = bitter.getAccount(user.getEmail());
-        User other = bitter.getUser(email);
-
-        if(!account.isFollowing(other)) {
-            account.addFollowing(other);
-            bitter.getAccount(email).addFollower(user);
+        if(bitter.getAccount(email) == null) {
+            System.out.println("No user exists with this email.");
         } else {
-            System.out.println("You are already following " + user.getName() + ".");
-        }
+            Account account = bitter.getAccount(user.getEmail());
+            User other = bitter.getUser(email);
 
-        System.out.println("You are now following " + user.getName() + ".");
+            if (!account.isFollowing(other)) {
+                account.addFollowing(other);
+                bitter.getAccount(email).addFollower(user);
+
+                System.out.println("You are now following " + other.getName() + ".");
+            } else {
+                System.out.println("You are already following " + other.getName() + ".");
+            }
+        }
         openMenu(MenuType.USER);
     }
 
     private void unfollow(final String email) {
-        Account account = bitter.getAccount(user.getEmail());
-        User other = bitter.getUser(email);
-
-        if(account.isFollowing(other)) {
-            account.removeFollowing(other);
-            bitter.getAccount(email).removeFollower(user);
+        if(bitter.getAccount(email) == null) {
+            System.out.println("No user exists with this email.");
         } else {
-            System.out.println("You were not following " + user.getName() + ".");
-        }
+            Account account = bitter.getAccount(user.getEmail());
+            User other = bitter.getUser(email);
 
-        System.out.println("You are no longer following " + user.getName() + ".");
+            if (account.isFollowing(other)) {
+                account.removeFollowing(other);
+                bitter.getAccount(email).removeFollower(user);
+            } else {
+                System.out.println("You were not following " + other.getName() + ".");
+            }
+
+            System.out.println("You are no longer following " + other.getName() + ".");
+        }
         openMenu(MenuType.USER);
     }
 
@@ -244,7 +253,7 @@ public class BitterPlatform {
     }
 
     private void viewUsers() {
-        bitter.getUsers().forEach((k, v) -> System.out.println(v));
+        bitter.getUsers().forEach((k, v) -> System.out.println(v.getName()));
 
         openMenu(MenuType.USER);
     }

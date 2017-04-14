@@ -10,7 +10,7 @@ public class UserDatabase extends HashMap<String, User> implements Serializable 
     }
 
     public void addUser(final String email, final User user) throws IllegalArgumentException {
-        if(email == null || get(email).getName().equals(user.getName())) {
+        if(email == null || get(email) != null) {
             throw new IllegalArgumentException();
         }
 
