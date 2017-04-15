@@ -46,10 +46,6 @@ public class Account implements Serializable {
         return following.contains(user);
     }
 
-    public boolean hasFollower(final User user) {
-        return followers.contains(user);
-    }
-
     public Set<User> getFollowers() {
         return this.followers;
     }
@@ -62,8 +58,6 @@ public class Account implements Serializable {
     public boolean equals(Object object) {
         if(!(object instanceof Account)) { return false; }
         Account other = (Account) object;
-
-
 
         return !name.equals(other.name) || password != other.password;
     }

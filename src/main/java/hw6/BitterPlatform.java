@@ -9,10 +9,6 @@ public class BitterPlatform {
     private static Bitter bitter;
     private static User user;
 
-    private BitterPlatform() {
-        setup();
-    }
-
     public static void main(String[] args) {
         new BitterPlatform().init();
     }
@@ -24,11 +20,8 @@ public class BitterPlatform {
                 FileInputStream fileStream = new FileInputStream(file);
                 ObjectInputStream stream = new ObjectInputStream(fileStream)
         ) {
-            try {
-                bitter = (Bitter) stream.readObject();
-            } catch (ClassNotFoundException ex) {
-                System.out.print(Lang.CLASS_NOT_FOUND);
-            }
+            try { bitter = (Bitter) stream.readObject(); }
+            catch (ClassNotFoundException ex) { System.out.print(Lang.CLASS_NOT_FOUND); }
             return true;
         } catch (IOException ex) {
             bitter = new Bitter();
@@ -54,9 +47,7 @@ public class BitterPlatform {
                 ObjectOutputStream stream = new ObjectOutputStream(fileStream)
         ) {
             stream.writeObject(bitter);
-        } catch (IOException ex) {
-            System.out.print(Lang.SAVE_FAIL);
-        }
+        } catch (IOException ex) { System.out.print(Lang.SAVE_FAIL); }
 
         System.exit(0);
     }
@@ -95,6 +86,7 @@ public class BitterPlatform {
 
     private void selectOption(final char option, final MenuType type) {
         String email, password, name;
+        Account account;
 
         switch(type) {
             case LOGIN:
@@ -146,25 +138,61 @@ public class BitterPlatform {
                         this.unfollow(email);
                         break;
                     case 'V':
-                        this.viewFollowers();
+                        account = bitter.getAccount(user.getEmail());
+
+                        System.out.println("\nFollowers:");
+                        System.out.printf("%-32s |%s\n", "Email", "Name");
+                        System.out.print("---------------------------------------------------------\n");
+                        account.getFollowers().forEach(follower -> System.out.printf("%-32s |%s\n", follower.getEmail(), follower.getName()));
+
+                        openMenu(MenuType.USER);
                         break;
                     case 'S':
-                        this.viewFollowing();
+                        account = bitter.getAccount(user.getEmail());
+
+                        System.out.println("\nFollowing:");
+                        System.out.printf("%-32s |%s\n", "Email", "Name");
+                        System.out.print("---------------------------------------------------------\n");
+                        account.getFollowing().forEach(following -> System.out.printf("%-32s |%s\n", following.getEmail(), following.getName()));
+
+                        openMenu(MenuType.USER);
                         break;
                     case 'A':
-                        this.viewUsers();
+                        System.out.println("\nUsers:");
+                        System.out.printf("%-32s |%s\n", "Email", "Name");
+                        System.out.print("---------------------------------------------------------\n");
+                        bitter.getUsers().forEach((e, u) -> System.out.printf("%-32s |%s\n", e, u.getName()));
+
+                        openMenu(MenuType.USER);
                         break;
                     case 'L':
-                        this.logout();
+                        user = null;
+
+                        openMenu(MenuType.LOGIN);
                         break;
                     case 'C':
-                        this.closeAccount();
+                        System.out.printf(Lang.ACCOUNT_CLOSED, user.getName());
+
+                        // Remove user from other people's sets of following/followers.
+                        bitter.getAccounts().forEach((e, a) -> {
+                            a.removeFollower(user);
+                            a.removeFollowing(user);
+                        });
+
+                        // Remove user from database along with their set of following/followers.
+                        account = bitter.getAccount(user.getEmail());
+
+                        account.getFollowers().clear();
+                        account.getFollowing().clear();
+                        bitter.removeUser(user.getEmail());
+
+                        user = null;
+                        openMenu(MenuType.LOGIN);
                         break;
                     default:
                         System.out.print(Lang.INVALID_OPTION);
                         openMenu(MenuType.USER);
                 }
-                break;
         }
     }
 
@@ -188,17 +216,12 @@ public class BitterPlatform {
 
         if(!account.getPassword().toString().equals(password)) {
             System.out.print(Lang.INCORRECT_PASSWORD);
-            selectOption('L', MenuType.LOGIN);
+            openMenu(MenuType.LOGIN);
         } else {
             user = bitter.getUsers().getUser(email);
         }
 
         openMenu(MenuType.USER);
-    }
-
-    private void logout() {
-        user = null;
-        openMenu(MenuType.LOGIN);
     }
 
     private void follow(final String email) {
@@ -243,32 +266,5 @@ public class BitterPlatform {
 
         }
         openMenu(MenuType.USER);
-    }
-
-    private void viewFollowers() {
-        Account account = bitter.getAccount(user.getEmail());
-        account.getFollowers().forEach(u -> System.out.println(u.getName()));
-
-        openMenu(MenuType.USER);
-    }
-
-    private void viewFollowing() {
-        Account account = bitter.getAccount(user.getEmail());
-        account.getFollowing().forEach(u -> System.out.println(u.getName()));
-
-        openMenu(MenuType.USER);
-    }
-
-    private void viewUsers() {
-        bitter.getUsers().forEach((k, v) -> System.out.println(v.getName()));
-
-        openMenu(MenuType.USER);
-    }
-
-    private void closeAccount() {
-        System.out.printf(Lang.ACCOUNT_CLOSED, user.getName());
-
-        bitter.removeUser(user.getEmail());
-        openMenu(MenuType.LOGIN);
     }
 }
