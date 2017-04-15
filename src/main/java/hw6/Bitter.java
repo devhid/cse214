@@ -12,9 +12,8 @@ public class Bitter implements Serializable {
     }
 
     public void addUser(String email, User user, Account account) throws IllegalArgumentException {
-        if(email == null || account == null ||
-                users.getUser(email) != null || accounts.getAccountInformation(email) != null) {
-            throw new IllegalArgumentException();
+        if(email == null || account == null || users.getUser(email) != null || accounts.getAccountInformation(email) != null) {
+            throw new IllegalArgumentException(Lang.USER_ALREADY_EXISTS);
         }
 
         users.addUser(email, user);
@@ -23,11 +22,11 @@ public class Bitter implements Serializable {
 
     public void removeUser(String email) throws IllegalArgumentException {
         if(email == null || users.get(email) == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(Lang.REMOVE_NON_EXISTING_USER);
         }
 
-        users.remove(email);
-        accounts.remove(email);
+        users.removeUser(email);
+        accounts.removeAccount(email);
     }
 
     public Account getAccount(final String email) {

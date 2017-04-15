@@ -1,9 +1,7 @@
 package hw6;
 
 import java.io.*;
-import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 
 public class BitterPlatform {
     private static final Scanner input = new Scanner(System.in);
@@ -29,7 +27,7 @@ public class BitterPlatform {
             try {
                 bitter = (Bitter) stream.readObject();
             } catch (ClassNotFoundException ex) {
-                System.out.println("Error. Bitter class could not be found.");
+                System.out.print(Lang.CLASS_NOT_FOUND);
             }
             return true;
         } catch (IOException ex) {
@@ -40,9 +38,9 @@ public class BitterPlatform {
 
     private void init() {
         if(!setup()) {
-            System.out.println("Hello, and welcome to Bitter, a more tasteful social network. No previous data found.");
+            System.out.printf(Lang.WELCOME_MSG, "No previous data found.");
         } else {
-            System.out.println("Hello, and welcome to Bitter, a more tasteful social network. Bitter.ser loaded.");
+            System.out.printf(Lang.WELCOME_MSG, "File bitter.ser loaded.");
         }
 
         openMenu(MenuType.LOGIN);
@@ -57,7 +55,7 @@ public class BitterPlatform {
         ) {
             stream.writeObject(bitter);
         } catch (IOException ex) {
-            System.out.println("Error. Current program state could not be saved to Bitter.ser.");
+            System.out.print(Lang.SAVE_FAIL);
         }
 
         System.exit(0);
@@ -70,10 +68,8 @@ public class BitterPlatform {
     private void showMenu(final MenuType type) {
         switch(type) {
             case LOGIN:
-                System.out.println("You are not logged in.");
-                System.out.printf("Menu: \n\t%s \n\t%s \n\t%s\n", "L) Login", "S) Sign up", "Q) Quit"); break;
-            case USER: System.out.printf("Menu: \n\t%s \n\t%s \n\t%s \n\t%s \n\t%s \n\t%s \n\t%s\n",
-                    "F) Follow", "U) Unfollow", "V) View Followers",
+                System.out.printf(Lang.LOGIN_MENU, "L) Login", "S) Sign up", "Q) Quit"); break;
+            case USER: System.out.printf(Lang.USER_MENU, "F) Follow", "U) Unfollow", "V) View Followers",
                     "S) See Following", "A) List All Users", "L) Logout", "C) Close Your Account"); break;
         }
     }
@@ -84,7 +80,7 @@ public class BitterPlatform {
 
         showMenu(type);
 
-        System.out.print("Please select an option: ");
+        System.out.print(Lang.INPUT_OPTION);
 
         option = input.nextLine();
         letter = option.isEmpty() ? '0' : option.trim().toUpperCase().charAt(0);
@@ -92,7 +88,7 @@ public class BitterPlatform {
         try {
             selectOption(letter, type);
         } catch (IllegalArgumentException ex) {
-            System.out.print("\n" + ex.getMessage());
+            System.out.print(ex.getMessage());
             openMenu(type);
         }
     }
@@ -104,32 +100,33 @@ public class BitterPlatform {
             case LOGIN:
                 switch(option) {
                     case 'L':
-                        System.out.print("Please enter your email: ");
+                        System.out.print(Lang.INPUT_EMAIL);
                         email = input.nextLine();
 
-                        System.out.print("Please enter your password: ");
+                        System.out.print(Lang.INPUT_PASSWORD);
                         password = input.nextLine();
 
                         this.login(email, password);
                         break;
                     case 'S':
-                        System.out.print("Please enter your email: ");
+                        System.out.print(Lang.INPUT_EMAIL);
                         email = input.nextLine();
 
-                        System.out.print("Please enter your name: ");
+                        System.out.print(Lang.INPUT_NAME);
                         name = input.nextLine();
 
-                        System.out.print("Please enter your password: ");
+                        System.out.print(Lang.INPUT_PASSWORD);
                         password = input.nextLine();
 
                         this.signup(email, name, password);
                         break;
                     case 'Q':
-                        System.out.print("Shutting down... Current program state saved to 'Bitter.ser'");
+                        System.out.print(Lang.SAVE_SUCCESS);
 
                         this.quit();
                         break;
                     default:
+                        System.out.print(Lang.INVALID_OPTION);
                         openMenu(MenuType.LOGIN);
                 }
 
@@ -137,13 +134,13 @@ public class BitterPlatform {
             case USER:
                 switch(option) {
                     case 'F':
-                        System.out.print("Please enter the email of the user you would like to follow: ");
+                        System.out.printf(Lang.FOLLOW_TOGGLE, "follow");
                         email = input.nextLine();
 
                         this.follow(email);
                         break;
                     case 'U':
-                        System.out.print("Please enter the email of the user you would like to unfollow: ");
+                        System.out.printf(Lang.FOLLOW_TOGGLE, "unfollow");
                         email = input.nextLine();
 
                         this.unfollow(email);
@@ -164,6 +161,7 @@ public class BitterPlatform {
                         this.closeAccount();
                         break;
                     default:
+                        System.out.print(Lang.INVALID_OPTION);
                         openMenu(MenuType.USER);
                 }
                 break;
@@ -176,21 +174,24 @@ public class BitterPlatform {
 
         user = newUser;
 
-        System.out.println("Thanks for joining Bitter!");
+        System.out.print(Lang.SIGNED_UP_SUCCESS);
         openMenu(MenuType.USER);
     }
 
     private void login(final String email, final String password) {
         Account account = bitter.getAccounts().getAccountInformation(email);
+        if(account == null) {
+            System.out.print(Lang.USER_NOT_FOUND);
+            openMenu(MenuType.LOGIN);
+            return;
+        }
 
-        if(!account.getPassword().equals(new Password(password))) {
-            System.out.println("Incorrect password. Please try again");
+        if(!account.getPassword().toString().equals(password)) {
+            System.out.print(Lang.INCORRECT_PASSWORD);
             selectOption('L', MenuType.LOGIN);
         } else {
             user = bitter.getUsers().getUser(email);
         }
-
-        System.out.println("You have logged in!");
 
         openMenu(MenuType.USER);
     }
@@ -202,18 +203,24 @@ public class BitterPlatform {
 
     private void follow(final String email) {
         if(bitter.getAccount(email) == null) {
-            System.out.println("No user exists with this email.");
+            System.out.print(Lang.USER_NOT_FOUND);
         } else {
             Account account = bitter.getAccount(user.getEmail());
             User other = bitter.getUser(email);
+
+            if(user.getEmail().equals(email)) {
+                System.out.print(Lang.CANNOT_FOLLOW_SELF);
+                openMenu(MenuType.USER);
+                return;
+            }
 
             if (!account.isFollowing(other)) {
                 account.addFollowing(other);
                 bitter.getAccount(email).addFollower(user);
 
-                System.out.println("You are now following " + other.getName() + ".");
+                System.out.printf(Lang.FOLLOW_SUCCESS, other.getName());
             } else {
-                System.out.println("You are already following " + other.getName() + ".");
+                System.out.printf(Lang.ALREADY_FOLLOWED, other.getName());
             }
         }
         openMenu(MenuType.USER);
@@ -221,7 +228,7 @@ public class BitterPlatform {
 
     private void unfollow(final String email) {
         if(bitter.getAccount(email) == null) {
-            System.out.println("No user exists with this email.");
+            System.out.printf(Lang.USER_NOT_FOUND);
         } else {
             Account account = bitter.getAccount(user.getEmail());
             User other = bitter.getUser(email);
@@ -229,11 +236,11 @@ public class BitterPlatform {
             if (account.isFollowing(other)) {
                 account.removeFollowing(other);
                 bitter.getAccount(email).removeFollower(user);
+                System.out.printf(Lang.UNFOLLOW_SUCCESS, other.getName());
             } else {
-                System.out.println("You were not following " + other.getName() + ".");
+                System.out.printf(Lang.NOT_FOLLOWING, other.getName());
             }
 
-            System.out.println("You are no longer following " + other.getName() + ".");
         }
         openMenu(MenuType.USER);
     }
@@ -259,6 +266,8 @@ public class BitterPlatform {
     }
 
     private void closeAccount() {
+        System.out.printf(Lang.ACCOUNT_CLOSED, user.getName());
+
         bitter.removeUser(user.getEmail());
         openMenu(MenuType.LOGIN);
     }

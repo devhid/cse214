@@ -7,7 +7,7 @@ public class Password implements Serializable {
 
     public Password(final String password) throws IllegalArgumentException {
         if(!isValid(password)) {
-            throw new IllegalArgumentException("Your password must contain at least 1 of each: uppercase, lowercase, number, symbol.");
+            throw new IllegalArgumentException(Lang.INVALID_PASSWORD);
         }
 
         this.password = password;
@@ -21,6 +21,11 @@ public class Password implements Serializable {
                         "(?=.*[!@#$%^&*])" +  // has at least 1 symbol
                         ".+$"
         );
+    }
+
+    @Override
+    public String toString() {
+        return this.password;
     }
 
     @Override
