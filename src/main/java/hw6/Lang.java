@@ -1,5 +1,12 @@
 package hw6;
 
+/**
+ * The {@code Lang} class contains all the messages used throughout the program.
+ *
+ * @author Mankirat Gulati
+ *    email: mankirat.gulati@stonybrook.edu
+ *    Stony Brook ID: 111161128
+ */
 public class Lang {
     static final String CLASS_NOT_FOUND = "Error. Could not find Bitter class.";
     static final String SAVE_SUCCESS = "Shutting down... Current program state saved to 'bitter.ser'";

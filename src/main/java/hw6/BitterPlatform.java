@@ -3,16 +3,28 @@ package hw6;
 import java.io.*;
 import java.util.Scanner;
 
+/**
+ * The {@code BitterPlatform) class acts as the driver for handling all social media interaction.
+ *
+ * @author Mankirat Gulati
+ *    email: mankirat.gulati@stonybrook.edu
+ *    Stony Brook ID: 111161128
+ */
 public class BitterPlatform {
+    // Handles all user input.
     private static final Scanner input = new Scanner(System.in);
 
+    // Instance of the bitter class.
     private static Bitter bitter;
+    // Instance of the user currently logged in.
     private static User user;
 
+    // Instantiates this class and initializes main program functionality.
     public static void main(String[] args) {
         new BitterPlatform().init();
     }
 
+    // Initializes the bitter instance to either a saved instance or a new object.
     private boolean setup() {
         File file = new File("bitter.ser");
 
@@ -29,6 +41,7 @@ public class BitterPlatform {
         }
     }
 
+    // Loads the bitter object and opens the login screen.
     private void init() {
         if(!setup()) {
             System.out.printf(Lang.WELCOME_MSG, "No previous data found.");
@@ -39,6 +52,7 @@ public class BitterPlatform {
         openMenu(MenuType.LOGIN);
     }
 
+    // Quits the program and saves the current state of the program to file.
     private void quit() {
         File file = new File("bitter.ser");
 
@@ -52,10 +66,12 @@ public class BitterPlatform {
         System.exit(0);
     }
 
+    // Enum representing the two different menus.
     private enum MenuType {
         LOGIN, USER
     }
 
+    // Displays menu options depending on the menu type.
     private void showMenu(final MenuType type) {
         switch(type) {
             case LOGIN:
@@ -65,6 +81,7 @@ public class BitterPlatform {
         }
     }
 
+    // Opens the specified menu.
     private void openMenu(final MenuType type) {
         String option;
         char letter;
@@ -84,9 +101,10 @@ public class BitterPlatform {
         }
     }
 
+    // Selects an option from the specified menu.
     private void selectOption(final char option, final MenuType type) {
-        String email, password, name;
         Account account;
+        String email, password, name;
 
         switch(type) {
             case LOGIN:
@@ -196,6 +214,7 @@ public class BitterPlatform {
         }
     }
 
+    // Creates a new account for the user in the social network.
     private void signup(final String email, final String name, final String password) {
         User newUser = new User(name, email);
         bitter.addUser(email, newUser, new Account(name, new Password(password)));
@@ -206,6 +225,7 @@ public class BitterPlatform {
         openMenu(MenuType.USER);
     }
 
+    // Logs the user in.
     private void login(final String email, final String password) {
         Account account = bitter.getAccounts().getAccountInformation(email);
         if(account == null) {
@@ -224,6 +244,7 @@ public class BitterPlatform {
         openMenu(MenuType.USER);
     }
 
+    // Allows the user to follow someone.
     private void follow(final String email) {
         if(bitter.getAccount(email) == null) {
             System.out.print(Lang.USER_NOT_FOUND);
@@ -249,6 +270,7 @@ public class BitterPlatform {
         openMenu(MenuType.USER);
     }
 
+    // Allows the user to unfollow someone.
     private void unfollow(final String email) {
         if(bitter.getAccount(email) == null) {
             System.out.printf(Lang.USER_NOT_FOUND);
