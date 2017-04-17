@@ -22,6 +22,8 @@ public class Lang {
     static final String INPUT_PASSWORD = "Please enter your password: ";
     static final String INPUT_NAME = "Please enter your name: ";
 
+    static final String EMPTY_EMAIL = "Your email field cannot be empty.\n";
+    static final String EMPTY_NAME = "Your name field cannot be empty.\n";
     static final String USER_NOT_FOUND = "No user was found with that email.\n";
     static final String USER_ALREADY_EXISTS = "Error. User already exists with that email.\n";
     static final String REMOVE_NON_EXISTING_USER = "Error. Cannot remove non-existing user.\n";

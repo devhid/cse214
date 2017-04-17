@@ -216,6 +216,14 @@ public class BitterPlatform {
 
     // Creates a new account for the user in the social network.
     private void signup(final String email, final String name, final String password) {
+        if(email.isEmpty()) {
+            throw new IllegalArgumentException(Lang.EMPTY_EMAIL);
+        }
+
+        if(name.isEmpty()) {
+            throw new IllegalArgumentException(Lang.EMPTY_NAME);
+        }
+
         User newUser = new User(name, email);
         bitter.addUser(email, newUser, new Account(name, new Password(password)));
 
