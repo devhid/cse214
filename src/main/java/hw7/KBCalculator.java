@@ -37,4 +37,43 @@ public class KBCalculator {
                 break;
         }
     }
+
+    private void importMovie(final String name) {
+        if(graph.getMovieMap().containsKey(name)) {
+            System.out.print("You already imported this movie.");
+            return;
+        }
+
+        graph.getMovieMap().put(name, new Movie(name));
+
+    }
+
+    private void printMovies() {
+        if(graph.getMovieMap().isEmpty()) {
+            System.out.print("No movies are imported.");
+            return;
+        }
+
+        graph.getMovieMap().forEach((s, movie) -> System.out.println(movie));
+    }
+
+    private void printActors() {
+
+    }
+
+    private void printShortestPath() {
+
+    }
+
+    private void printBFS() {
+
+    }
+
+    private void lookupActor(final String name) {
+
+    }
+
+    public static ActorGraph getGraph() {
+        return graph;
+    }
 }
