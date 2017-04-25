@@ -51,5 +51,9 @@ public class Actor {
         this.visited = visited;
     }
 
+    @Override
+    public String toString() {
+        return this.name;
+    }
 
 }
