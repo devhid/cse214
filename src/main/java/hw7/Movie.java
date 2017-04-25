@@ -20,16 +20,20 @@ public class Movie {
         ds.load();
 
         this.title = ds.fetchString("movie/title");
-        this.actors = new HashSet<>();
+        this.year = ds.fetchInt("movie/year");
 
-        StringTokenizer tokenizer = new StringTokenizer(ds.fetchString("movie/actors"), ",");
+        this.actors = loadActors(ds);
+    }
+
+    private Set<Actor> loadActors(final DataSource source) {
+        actors = new HashSet<>();
+
+        StringTokenizer tokenizer = new StringTokenizer(source.fetchString("movie/actors"), ",");
         while(tokenizer.hasMoreTokens()) {
             actors.add(new Actor(tokenizer.nextToken().trim()));
         }
 
-        actors.forEach(System.out::println);
-
-        this.year = ds.fetchInt("movie/year");
+        return actors;
     }
 
     public String getTitle() {
