@@ -10,4 +10,12 @@ public class ActorGraph {
     public static LinkedList<String> bfs(final String name) {
         return null;
     }
+
+    public HashMap<String, Actor> getActorMap() {
+        return actorsByName;
+    }
+
+    public HashMap<String, Movie> getMovieMap() {
+        return moviesByName;
+    }
 }
