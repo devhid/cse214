@@ -23,7 +23,7 @@ public class Actor {
         this.path = new LinkedList<>();
     }
 
-    private String getName() {
+    public String getName() {
         return this.name;
     }
 
