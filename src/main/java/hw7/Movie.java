@@ -2,7 +2,7 @@ package hw7;
 
 import big.data.DataSource;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -11,6 +11,7 @@ public class Movie {
     private int year;
 
     private Set<Actor> actors;
+    private Set<String> actorNames;
 
     public Movie(final String title) {
         String prefix = "http://www.omdbapi.com/?t=";
@@ -22,18 +23,22 @@ public class Movie {
         this.title = ds.fetchString("movie/title");
         this.year = ds.fetchInt("movie/year");
 
-        this.actors = loadActors(ds);
+        this.actorNames = loadActors(ds);
     }
 
-    private Set<Actor> loadActors(final DataSource source) {
-        actors = new HashSet<>();
+    private Set<String> loadActors(final DataSource source) {
+        actorNames = new LinkedHashSet<>();
 
         StringTokenizer tokenizer = new StringTokenizer(source.fetchString("movie/actors"), ",");
         while(tokenizer.hasMoreTokens()) {
-            actors.add(new Actor(tokenizer.nextToken().trim()));
+            actorNames.add(tokenizer.nextToken().trim());
         }
 
-        return actors;
+        return actorNames;
+    }
+
+    public Set<String> getActorNames() {
+        return this.actorNames;
     }
 
     public String getTitle() {
@@ -48,11 +53,19 @@ public class Movie {
         return this.actors;
     }
 
+    public void setActors(Set<Actor> actors) {
+        this.actors = actors;
+    }
+
     public void setTitle(final String title) {
         this.title = title;
     }
 
     public void setYear(int year) {
         this.year = year;
+    }
+
+    public String toString() {
+        return this.title;
     }
 }

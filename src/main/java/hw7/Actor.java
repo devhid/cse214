@@ -1,8 +1,6 @@
 package hw7;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
 
 public class Actor {
     private String name;
@@ -16,8 +14,8 @@ public class Actor {
     public Actor(final String name) {
         this.name = name;
 
-        this.movies = new HashSet<>();
-        this.friends = new HashSet<>();
+        this.movies = new LinkedHashSet<>();
+        this.friends = new LinkedHashSet<>();
 
         this.visited = false;
         this.path = new LinkedList<>();
@@ -41,6 +39,22 @@ public class Actor {
 
     public LinkedList<String> getPath() {
         return this.path;
+    }
+
+    public void addMovie(final Movie movie) {
+        movies.add(movie);
+    }
+
+    public void addFriend(final Actor friend) {
+        friends.add(friend);
+    }
+
+    public void setFriends(Set<Actor> friends) {
+        this.friends = friends;
+    }
+
+    public void setPath(LinkedList<String> path) {
+        this.path = new LinkedList<>(path);
     }
 
     public void setName(final String name) {

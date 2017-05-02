@@ -2,9 +2,9 @@ package hw7;
 
 import java.util.Comparator;
 
-public class TitleComparator implements Comparator {
+public class TitleComparator implements Comparator<Movie> {
     @Override
-    public int compare(Object o1, Object o2) {
-        return ((Movie) o1).getTitle().compareTo(((Movie) o2).getTitle());
+    public int compare(Movie m1, Movie m2) {
+        return m1.getTitle().compareTo(m2.getTitle());
     }
 }
