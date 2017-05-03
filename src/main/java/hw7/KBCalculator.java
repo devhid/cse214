@@ -1,31 +1,39 @@
 package hw7;
 
 import big.data.DataInstantiationException;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * The {@code KBCalculator) class acts as the driver for handling all movie operations.
+ *
+ * @author Mankirat Gulati
+ *    email: mankirat.gulati@stonybrook.edu
+ *    Stony Brook ID: 111161128
+ */
 public class KBCalculator {
+    // Handles the input for menu operations.
     private static final Scanner input = new Scanner(System.in);
+    // An instance of the ActorGraph class.
     private static final ActorGraph graph = new ActorGraph();
 
+    // The name comparator for actors.
+    private static final NameComparator nameComparator = new NameComparator();
+    // The title comparator for movies.
+    private static final TitleComparator titleComparator = new TitleComparator();
+
     public static void main(String[] args) {
-        KBCalculator kb = new KBCalculator();
-
-        kb.importMovie("The Big Lebowski");
-        kb.importMovie("K-Pax");
-        kb.importMovie("Titanic");
-        kb.importMovie("The Wolf of Wall Street");
-        kb.importMovie("Apollo 13");
-        kb.importMovie("Catch Me if you Can");
-
-        kb.openMenu(true);
+        new KBCalculator().openMenu(true);
     }
 
+    // Opens the menu and asks for input.
     private void openMenu(boolean start) {
-        if(start) { System.out.printf("Options:\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n", "I) Import Movie", "A) Print all actors", "M) Print all movies",
-                "P) Print shortest path", "B) Print the BFS from an actor", "L) Lookup Actor", "Q) Quit"); }
+        if(start) {
+            System.out.println("\t\tWelcome to the Kevin Bacon calculator!");
+            System.out.printf("Options:\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n", "I) Import Movie", "A) Print all actors", "M) Print all movies",
+                "P) Print shortest path", "B) Print the BFS from an actor", "L) Lookup Actor", "Q) Quit");
+        }
 
         System.out.print("\nPlease select an option: ");
 
@@ -41,6 +49,7 @@ public class KBCalculator {
         }
     }
 
+    // Selects an option from the menu.
     private void selectOption(final char option) {
         switch(option) {
             case 'I':
@@ -48,11 +57,11 @@ public class KBCalculator {
                 this.importMovie(input.nextLine());
                 break;
             case 'A':
-                System.out.println("\nACTORS\n----------------------------------------");
+                System.out.println("\nActors:\n----------------------------------------");
                 this.printActors();
                 break;
             case 'M':
-                System.out.println("\nMOVIES:\n----------------------------------------");
+                System.out.println("\nMovies:\n----------------------------------------");
                 this.printMovies();
                 break;
             case 'P':
@@ -84,6 +93,7 @@ public class KBCalculator {
         }
     }
 
+    // Adds every actor in a movie as friends as each other.
     private void addFriends(final Movie movie) {
         for(Actor actor: movie.getActors()) {
             for(Actor ac: movie.getActors()) {
@@ -94,7 +104,8 @@ public class KBCalculator {
         }
     }
 
-    private void importMovie(final String title) {
+    // Imports a specified movie.
+    private void importMovie(final String title) throws IllegalArgumentException {
         Movie movie = new Movie(title);
 
         if(graph.hasMovie(movie.getTitle())) {
@@ -119,35 +130,38 @@ public class KBCalculator {
             actor.addMovie(movie);
         });
 
-        movie.setActors((LinkedHashSet<Actor>) actors.clone());
+        movie.setActors(actors);
         addFriends(movie);
 
         System.out.println(movie.getTitle() + "(" + movie.getYear() + ") starring: " + movie.getActorNames());
-        //openMenu(false);
+        openMenu(false);
     }
 
+    // Prints the imported movies.
     private void printMovies() {
         if(graph.getMovieMap().isEmpty()) {
             System.out.print("No movies are imported.\n");
         } else {
-            Stream<Movie> movies = graph.getMovies().stream().sorted(new TitleComparator());
+            Stream<Movie> movies = graph.getMovies().stream().sorted(titleComparator);
             movies.forEach(System.out::println);
         }
 
         openMenu(false);
     }
 
+    // Prints all the actors from all imported movies.
     private void printActors() {
         if(graph.getActorMap().isEmpty()) {
-            System.out.println("No actors are imported.\n");
+            System.out.print("No actors are imported.\n");
         } else {
-            graph.getActors().stream().sorted(new NameComparator()).forEach(System.out::println);
+            graph.getActors().stream().sorted(nameComparator).forEach(System.out::println);
         }
 
         openMenu(false);
     }
 
-    private void printShortestPath(String firstActor, String secondActor) {
+    // Prints the shortest path between two actors.
+    private void printShortestPath(String firstActor, String secondActor) throws IllegalArgumentException {
         if(!graph.hasActor(firstActor) || !graph.hasActor(secondActor)) {
             throw new IllegalArgumentException("No actor(s) by those name(s) found (names are case-sensitive).");
         }
@@ -164,7 +178,8 @@ public class KBCalculator {
         openMenu(false);
     }
 
-    private void printBFS(String actor) {
+    // Prints the breadth first search from a specified actor.
+    private void printBFS(String actor) throws IllegalArgumentException {
         if(!graph.hasActor(actor)) {
             throw new IllegalArgumentException("No actor by that name found (names are case-sensitive).");
         }
@@ -173,7 +188,8 @@ public class KBCalculator {
         openMenu(false);
     }
 
-    private void lookupActor(final String name) {
+    // Looks up an actor's information such as friends and movies they have starred in.
+    private void lookupActor(final String name) throws IllegalArgumentException {
         if(!graph.hasActor(name)) {
             throw new IllegalArgumentException("No actor by this name found (names are case-sensitive).");
         }
